@@ -1,0 +1,157 @@
+\section{Проблема построения графа: Out Of Memory}
+\label{sec:oom-problem}
+
+Стандартная функция \texttt{pgr\_nodeNetwork} из библиотеки \texttt{pgRouting} предназначена для автоматического построения топологии: она находит пересечения дорог и создает узлы графа. Алгоритм работает по принципу <<загрузить весь граф в память>>.
+
+При переходе от тестового графа (район Хамовники, $\approx$ 5000 ребер) к полному графу Московской агломерации (более 250\,000 ребер) процесс сборки стабильно завершался с ошибкой \textbf{OOM (Out Of Memory)}.
+
+\subsection{Анализ потребления ресурсов}
+
+В таблице \ref{tab:oom-metrics} приведены метрики потребления ресурсов при использовании стандартного подхода.
+
+\begin{table}[H]
+    \centering
+    \caption{Потребление ресурсов при сборке (Legacy подход)}
+    \label{tab:oom-metrics}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Метрика} & \textbf{Значение} & \textbf{Источник} \\ \hline
+        Потребление RAM & $> 12$ ГБ & \texttt{docker stats} (пик перед OOM) \\ \hline
+        Время до падения & $\approx 2$ часа & Логи контейнера \\ \hline
+        Доступная RAM & 16 ГБ & Аппаратное ограничение сервера \\ \hline
+        Результат & Crash (Code 137) & Kernel OOM Killer \\ \hline
+    \end{tabular}
+\end{table}
+
+Профилирование показало, что узким местом являются длинные магистрали (МКАД, ТТК, Ленинградское шоссе). В исходных данных OSM они представлены одной геометрией длиной 8--15 км.
+
+\begin{code}{edge-stats}{SQL}{Запрос статистики длин ребер}
+SELECT 
+    PERCENTILE_CONT(0.5)  WITHIN GROUP(ORDER BY length_m) AS median,
+    PERCENTILE_CONT(0.99) WITHIN GROUP(ORDER BY length_m) AS p99,
+    MAX(length_m) AS max_len,
+    COUNT(*) AS count
+FROM raw_osm_edges;
+\end{code}
+
+Вариант 2: Простой код (текст в рамке)
+% Аргументы: {label}{Подпись}
+\begin{plaincode}{config-example}{Пример конфигурации}
+server_host = 127.0.0.1
+server_port = 8080
+\end{plaincode}
+
+Результат анализа длин ребер представлен в таблице \ref{tab:edge-len-stats}.
+
+\begin{table}[H]
+    \centering
+    \caption{Статистика длин ребер ДО оптимизации}
+    \label{tab:edge-len-stats}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Перцентиль} & \textbf{Длина (м)} & \textbf{Комментарий} \\ \hline
+        Median (50\%) & 70.46 & Типичная улица \\ \hline
+        P99 (99\%) & 841.80 & Начало <<хвоста>> распределения \\ \hline
+        \textbf{Max} & \textbf{8373.13} & МКАД одним куском \\ \hline
+    \end{tabular}
+\end{table}
+
+\section{Архитектура хранения данных}
+
+Для обеспечения преемственности данных (Data Lineage) и высокой производительности поиска, база данных разделена на два логических контура: \textbf{OSM} (сырые данные) и \textbf{GRAPHS} (оптимизированная топология).
+
+\begin{figure}[H]
+    \centering
+    % ER-диаграмма высокая, ограничиваем высоту
+    \includemermaid[height=0.5\textheight]{02-er-schema}
+    \caption{ER-диаграмма схемы данных (OSM vs GRAPHS)}
+    \label{fig:er-schema}
+\end{figure}
+
+Ключевые детали реализации:
+\begin{itemize}
+    \item \textbf{[GiST] Indices:} Каждая таблица с геометрией снабжена пространственным индексом. Поиск пересечений без индекса на 250k ребер занимает более 10 часов, с индексом --- менее 15 минут.
+    \item \textbf{Data Lineage:} Поле \texttt{osm\_way\_id} позволяет прокидывать любые теги из сырых данных в веса графа без перестроения топологии.
+\end{itemize}
+
+\section{Реальный процесс построения}
+
+В отличие от стандартных решений, разработанный механизм построения графа прозрачен и оптимизирован под ограничения RAM (16 ГБ).
+
+\begin{figure}[H]
+    \centering
+    % ТА САМАЯ ДИАГРАММА, КОТОРУЮ МЫ ЧИНИЛИ
+    \includemermaid[height=0.3\textheight]{02-logic-flow}
+    \caption{Алгоритм построения дорожного графа. Это очень длинный текст, чтобы проверить, что как он будет переноситься на следующую строку.}
+    \label{fig:build-flow}
+\end{figure}
+
+Процесс включает следующие этапы:
+\begin{enumerate}
+    \item \textbf{Дискретизация:} Линии длиннее 500 м нарезаются на сегменты.
+    \item \textbf{Разделение потоков:} Мосты и тоннели исключаются из процесса поиска пересечений.
+    \item \textbf{Грид-Нодинг:} Мир разбивается на тайлы, пересечения ищутся изолированно в памяти.
+    \item \textbf{Наследование атрибутов:} Восстановление названий улиц и скоростных режимов по пространственному индексу.
+\end{enumerate}
+
+\section{Решение: Grid Partitioning}
+
+Вместо обработки всего графа целиком, карта разбивается на квадратные тайлы размером $0.05^\circ \times 0.05^\circ$ ($\approx 3\times 5$ км).
+
+\begin{figure}[H]
+    \centering
+    \includemermaid[height=0.3\textheight]{02-grid-algo}
+    \caption{Схема алгоритма Grid Partitioning}
+    \label{fig:grid-algo}
+\end{figure}
+
+\subsection{Результаты оптимизации}
+
+Сравнение производительности представлено в таблице \ref{tab:optim-results}.
+
+\begin{table}[H]
+    \centering
+    \caption{Сравнение подходов к построению графа}
+    \label{tab:optim-results}
+    \begin{tabular}{|l|p{4cm}|p{4cm}|l|}
+        \hline
+        \textbf{Метрика} & \textbf{Legacy} & \textbf{Grid Partitioning} & \textbf{Улучшение} \\ \hline
+        RAM & $> 12$ ГБ (OOM) & \textbf{370 МБ} & $\downarrow 32$x \\ \hline
+        Время & $> 4$ часа & \textbf{13 минут} & $\downarrow 18$x \\ \hline
+        Стабильность & Crash & Success & --- \\ \hline
+    \end{tabular}
+\end{table}
+
+\section{Контроль качества графа}
+
+\subsection{Поиск островов связности}
+Частая ошибка --- создание изолированных подграфов. Для анализа связности использовалась функция \texttt{pgr\_connectedComponents}.
+
+\begin{table}[H]
+    \centering
+    \caption{Анализ компонент связности}
+    \label{tab:connectivity}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Компонента} & \textbf{Кол-во ребер} & \textbf{Доля} \\ \hline
+        \textbf{Main (ID=1)} & 240,234 & \textbf{98.4\%} \\ \hline
+        Island 2 & 1,823 & 0.7\% \\ \hline
+        Island 3 & 892 & 0.4\% \\ \hline
+    \end{tabular}
+\end{table}
+
+\section{Разделение потоков: Ground vs Elevated}
+
+Для решения проблемы ложных пересечений (например, эстакада над улицей) применяется группировка по слоям.
+
+\begin{table}[H]
+    \centering
+    \caption{Логика разделения слоев}
+    \label{tab:layers}
+    \begin{tabular}{|p{3cm}|p{6cm}|p{4cm}|}
+        \hline
+        \textbf{Группа} & \textbf{Критерий (OSM tags)} & \textbf{Обработка} \\ \hline
+        \textbf{Group A (Ground)} & \texttt{layer=0} AND NOT bridge/tunnel & \texttt{pgr\_nodeNetwork} \\ \hline
+        \textbf{Group B (Isolated)} & \texttt{bridge=yes} OR \texttt{tunnel=yes} & Только \texttt{ST\_Subdivide} \\ \hline
+    \end{tabular}
+\end{table}

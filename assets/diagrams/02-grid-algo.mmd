@@ -1,0 +1,44 @@
+%%{
+  init: {
+    "theme": "base",
+    "themeVariables": {
+      "fontSize": "22px",
+      "fontFamily": "GOST2304 Type A",
+      "lineColor": "#000000"
+    },
+    "flowchart": {
+      "htmlLabels": true,
+      "nodeSpacing": 30,
+      "rankSpacing": 40,
+      "padding": 10
+    }
+  }
+}%%
+
+flowchart LR
+    %% Стили
+    classDef db fill:#e1f7d5,stroke:#333,stroke-width:1px,shape:cylinder;
+    classDef process fill:#fff0b3,stroke:#f39c12,stroke-width:2px,rx:5,ry:5;
+    classDef result fill:#d5e8f7,stroke:#005f9e,stroke-width:2px,shape:cylinder;
+
+    Raw[("OSM Data<br/>(228k edges)")]:::db
+    
+    subgraph Tiling ["Параллельная обработка"]
+        direction TB
+        T1["Tile 1"]:::process
+        T2["..."]:::process
+        TN["Tile N"]:::process
+    end
+    
+    subgraph Algo ["Алгоритм в памяти"]
+        direction TB
+        S1["ST_Subdivide"]:::process
+        Topo1["pgr_nodeNetwork<br/>(In-Memory)"]:::process
+    end
+
+    Final[("graphs.edges<br/>(244k edges)")]:::result
+    
+    Raw --> Tiling
+    Tiling --> S1
+    S1 --> Topo1
+    Topo1 --> Final

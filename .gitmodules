@@ -1,0 +1,3 @@
+[submodule "latex-iu1-template"]
+	path = latex-iu1-template
+	url = https://github.com/L1CH7/latex-iu1-template.git

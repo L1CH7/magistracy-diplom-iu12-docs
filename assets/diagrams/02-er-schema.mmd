@@ -1,0 +1,47 @@
+%%{
+  init: {
+    "theme": "base",
+    "themeVariables": {
+      "fontFamily": "GOST2304 Type A",
+      "fontSize": "20px",
+      "lineColor": "#000000"
+    }
+  }
+}%%
+
+erDiagram
+    %% --- Схема OSM ---
+    osm_ways {
+        bigint osm_id PK
+        geometry geom
+        jsonb tags
+        varchar highway
+    }
+    osm_barriers {
+        bigint id PK
+        varchar barrier_type
+    }
+    osm_turn_restrictions {
+        bigint id PK
+        varchar restriction_type
+    }
+
+    %% --- Схема GRAPHS ---
+    graphs_nodes {
+        bigint id PK
+        bigint osm_node_id
+        geometry geom
+    }
+    graphs_edges {
+        bigint id PK
+        bigint source_id FK
+        bigint target_id FK
+        float cost
+        float reverse_cost
+    }
+
+    graphs_nodes ||--o{ graphs_edges : "source"
+    graphs_nodes ||--o{ graphs_edges : "target"
+    osm_ways ||--o{ graphs_edges : "lineage"
+    osm_ways ||--o{ osm_turn_restrictions : "defines"
+    osm_barriers }|..|{ graphs_edges : "intersects"

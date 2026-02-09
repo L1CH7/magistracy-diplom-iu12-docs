@@ -1,0 +1,6 @@
+build/
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+assets/**/*.pdf
