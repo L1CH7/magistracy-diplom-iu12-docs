@@ -26,19 +26,11 @@
 
 \maketableofcontents
 
-% --- Контент ---
-% --- ВВЕДЕНИЕ ---
-% Звездочка * убирает номер "Глава 1"
-\chapter*{ВВЕДЕНИЕ} 
-% Руками добавляем в оглавление
-\addcontentsline{toc}{chapter}{ВВЕДЕНИЕ} 
-
-\input{chapters/01-intro}
-
-
-% --- ГЛАВА 1 (НУМЕРУЕТСЯ) ---
-% Тут уже обычная chapter без звездочки
-\chapter{Построение графа}
-\input{chapters/02-routing}
+\input{chapters/00-intro}
+\input{chapters/01-analysis}
+\input{chapters/02-research}
+\input{chapters/03-implementation}
+\input{chapters/04-testing}
+\input{chapters/05-conclusion}
 
 \end{document}

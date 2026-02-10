@@ -1,0 +1,33 @@
+flowchart TB
+    User((User))
+    
+    subgraph Client [Qt Client Application]
+        UI[PyQt Interface]
+        Map[MapLibre GL JS]
+    end
+
+    subgraph Backend [Backend Infrastructure]
+        Gateway[API Gateway]
+        Router[Router Service]
+        DP[Data Processor]
+    end
+
+    subgraph Storage [Data Layer]
+        DB["(PostgreSQL<br/>PostGIS + pgRouting)"]
+    end
+
+    subgraph External [External Services]
+        OSM[Overpass API]
+    end
+
+    User --> UI
+    UI --> Map
+    UI --> Gateway
+    Map --> Gateway
+
+    Gateway -- REST/WS --> Router
+    Gateway -- REST --> DP
+
+    Router --> DB
+    DP --> DB
+    DP --> OSM

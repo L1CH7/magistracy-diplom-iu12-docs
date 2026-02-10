@@ -1,0 +1,20 @@
+sequenceDiagram
+    participant C1 as Client 1
+    participant API as FastAPI (Async)
+    participant PG as PostgreSQL (MVCC)
+    participant C2 as Client 2
+    
+    C1->>API: GET /route A->B
+    C2->>API: GET /route C->D
+    
+    API->>PG: Query 1 (Start)
+    API->>PG: Query 2 (Start)
+    
+    Note over PG: MVCC: Читатели не блокируют друг друга
+    Note over PG: I/O Wait (Disk) - CPU FREE
+    
+    PG-->>API: Result 1
+    PG-->>API: Result 2
+    
+    API-->>C1: Response A->B
+    API-->>C2: Response C->D

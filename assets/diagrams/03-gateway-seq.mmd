@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant C as Client (Qt)
+    participant G as Gateway
+    participant R as Router Service
+    participant D as DB
+
+    Note over C, G: WebSocket Handshake
+    C->>G: CONNECT /ws/route
+    G->>R: CONNECT /ws/route (Proxy)
+    R-->>G: 101 Switching Protocols
+    G-->>C: 101 Switching Protocols
+    
+    Note over C, R: Bidirectional Stream
+    
+    C->>G: JSON: { "points": [A, B] }
+    G->>R: Forward Message
+    
+    R->>D: SQL: Find Path
+    D-->>R: Path Reult
+    
+    R-->>G: JSON: { "status": "calculating", "progress": 50% }
+    G-->>C: Forward Progress
+    
+    R-->>G: JSON: { "route": "geojson..." }
+    G-->>C: Final Result
+    
+    C->>G: CLOSE
+    G->>R: CLOSE

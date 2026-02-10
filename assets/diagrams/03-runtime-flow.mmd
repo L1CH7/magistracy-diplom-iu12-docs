@@ -1,0 +1,17 @@
+flowchart TD
+    %% --- Styles ---
+    classDef client fill:#f9f,stroke:#333;
+    classDef logic fill:#fff0b3,stroke:#f39c12;
+    classDef db fill:#d5e8f7,stroke:#005f9e;
+
+    Start(["GET /route"]):::client --> Snap["Smart Snapping (KNN)"]:::logic
+    Snap --> BBox["Dynamic BBOX (Zone Limit)"]:::logic
+    
+    BBox --> Iter{{"Итерация K?"}}:::logic
+    Iter --> Dijkstra["SQL: pgr_dijkstra (Inside BBOX)"]:::db
+    
+    Dijkstra --> ZigZag["Zig-Zag Fix (ST_Reverse)"]:::logic
+    ZigZag --> Result{{"K путей собрано?"}}:::logic
+    
+    Result -- Нет (Penalty) --> Iter
+    Result -- Да --> Response(["JSON Response"]):::client

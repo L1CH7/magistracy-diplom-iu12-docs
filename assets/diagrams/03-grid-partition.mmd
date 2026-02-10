@@ -1,0 +1,19 @@
+flowchart LR
+    %% --- Styles ---
+    classDef raw fill:#e1f7d5,stroke:#333;
+    classDef tile fill:#fff0b3,stroke:#f39c12;
+    classDef final fill:#d5e8f7,stroke:#005f9e;
+
+    Raw[("OSM Data (228k edges)")]:::raw --> Filter{BBOX Filter}
+    
+    Filter --> T1["Tile 1 (~5k)"]:::tile
+    Filter --> T2["Tile 2 (~5k)"]:::tile
+    Filter --> TN["Tile N (~5k)"]:::tile
+    
+    T1 -->|pgr_nodeNetwork| Topo1["Local Topo 1"]:::tile
+    T2 -->|pgr_nodeNetwork| Topo2["Local Topo 2"]:::tile
+    TN -->|pgr_nodeNetwork| TopoN["Local Topo N"]:::tile
+    
+    Topo1 --> Final[("Final Graph (graphs.edges)")]:::final
+    Topo2 --> Final
+    TopoN --> Final

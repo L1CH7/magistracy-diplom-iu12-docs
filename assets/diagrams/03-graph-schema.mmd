@@ -1,0 +1,45 @@
+erDiagram
+    %% --- Source Data (OSM) ---
+    osm_ways {
+        bigint osm_id PK
+        geometry geom "GiST Index"
+        jsonb tags
+        varchar highway
+        varchar oneway
+    }
+    
+    osm_barriers {
+        bigint id PK
+        geometry geom
+        varchar barrier_type
+    }
+
+    osm_turn_restrictions {
+        bigint id PK
+        bigint from_way_id FK
+        bigint to_way_id FK
+        varchar restriction_type
+    }
+
+    %% --- Routing Graph (Product) ---
+    graphs_nodes {
+        bigint id PK
+        bigint osm_node_id
+        geometry geom "GiST Index"
+    }
+
+    graphs_edges {
+        bigint id PK
+        bigint source_id FK
+        bigint target_id FK
+        bigint osm_way_id FK
+        geometry geometry
+        float cost
+        float reverse_cost
+    }
+
+    %% Relationships
+    graphs_nodes ||--o{ graphs_edges : "source"
+    graphs_nodes ||--o{ graphs_edges : "target"
+    osm_ways ||--o{ graphs_edges : "data source"
+    osm_ways ||--o{ osm_turn_restrictions : "defines"
