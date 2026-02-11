@@ -1,0 +1,574 @@
+
+<document filename="01-system-arch.mmd">
+flowchart TB
+    User((User))
+    
+    subgraph Client [Qt Client Application]
+        UI[PyQt Interface]
+        Map[MapLibre GL JS]
+    end
+
+    subgraph Backend [Backend Infrastructure]
+        Gateway[API Gateway]
+        Router[Router Service]
+        DP[Data Processor]
+    end
+
+    subgraph Storage [Data Layer]
+        DB["(PostgreSQL<br/>PostGIS + pgRouting)"]
+    end
+
+    subgraph External [External Services]
+        OSM[Overpass API]
+    end
+
+    User --> UI
+    UI --> Map
+    UI --> Gateway
+    Map --> Gateway
+
+    Gateway -- REST/WS --> Router
+    Gateway -- REST --> DP
+
+    Router --> DB
+    DP --> DB
+    DP --> OSM
+
+</document>
+
+<document filename="02-er-schema.mmd">
+%%{
+  init: {
+    "theme": "base",
+    "themeVariables": {
+      "fontFamily": "GOST2304 Type A",
+      "fontSize": "20px",
+      "lineColor": "#000000"
+    }
+  }
+}%%
+
+erDiagram
+    %% --- Схема OSM ---
+    osm_ways {
+        bigint osm_id PK
+        geometry geom
+        jsonb tags
+        varchar highway
+    }
+    osm_barriers {
+        bigint id PK
+        varchar barrier_type
+    }
+    osm_turn_restrictions {
+        bigint id PK
+        varchar restriction_type
+    }
+
+    %% --- Схема GRAPHS ---
+    graphs_nodes {
+        bigint id PK
+        bigint osm_node_id
+        geometry geom
+    }
+    graphs_edges {
+        bigint id PK
+        bigint source_id FK
+        bigint target_id FK
+        float cost
+        float reverse_cost
+    }
+
+    graphs_nodes ||--o{ graphs_edges : "source"
+    graphs_nodes ||--o{ graphs_edges : "target"
+    osm_ways ||--o{ graphs_edges : "lineage"
+    osm_ways ||--o{ osm_turn_restrictions : "defines"
+    osm_barriers }|..|{ graphs_edges : "intersects"
+</document>
+
+<document filename="02-grid-algo.mmd">
+%%{
+  init: {
+    "theme": "base",
+    "themeVariables": {
+      "fontSize": "22px",
+      "fontFamily": "GOST2304 Type A",
+      "lineColor": "#000000"
+    },
+    "flowchart": {
+      "htmlLabels": true,
+      "nodeSpacing": 30,
+      "rankSpacing": 40,
+      "padding": 10
+    }
+  }
+}%%
+
+flowchart LR
+    %% Стили
+    classDef db fill:#e1f7d5,stroke:#333,stroke-width:1px,shape:cylinder;
+    classDef process fill:#fff0b3,stroke:#f39c12,stroke-width:2px,rx:5,ry:5;
+    classDef result fill:#d5e8f7,stroke:#005f9e,stroke-width:2px,shape:cylinder;
+
+    Raw[("OSM Data<br/>(228k edges)")]:::db
+    
+    subgraph Tiling ["Параллельная обработка"]
+        direction TB
+        T1["Tile 1"]:::process
+        T2["..."]:::process
+        TN["Tile N"]:::process
+    end
+    
+    subgraph Algo ["Алгоритм в памяти"]
+        direction TB
+        S1["ST_Subdivide"]:::process
+        Topo1["pgr_nodeNetwork<br/>(In-Memory)"]:::process
+    end
+
+    Final[("graphs.edges<br/>(244k edges)")]:::result
+    
+    Raw --> Tiling
+    Tiling --> S1
+    S1 --> Topo1
+    Topo1 --> Final
+</document>
+
+<document filename="02-logic-flow.mmd">
+%%{
+  init: {
+    "theme": "base",
+    "themeVariables": {
+      "fontSize": "24px",
+      "fontFamily": "GOST2304 Type A",
+      "lineColor": "#000000"
+    },
+    "flowchart": {
+      "htmlLabels": true,
+      "wrappingWidth": 200,
+      "rankSpacing": 60,
+      "padding": 5
+    }
+  }
+}%%
+
+flowchart TD
+    %% --- СТИЛИ ---
+    classDef rawData fill:#e1f7d5,stroke:#333,stroke-width:1px,shape:cylinder;
+    classDef graphData fill:#d5e8f7,stroke:#005f9e,stroke-width:2px,shape:cylinder;
+    classDef process fill:#fff0b3,stroke:#f39c12,stroke-width:2px,shape:rect,rx:5,ry:5;
+    classDef action fill:#fff,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5,shape:hexagon;
+
+    %% --- 1. ВХОДНЫЕ ДАННЫЕ ---
+    subgraph Input ["1. Входной слой&nbsp;<br/>(Schema OSM)<br/>&nbsp;"]
+        direction TB
+        Ways[("osm.ways")]:::rawData
+        Barriers[("osm.barriers")]:::rawData
+        Restr[("osm.turn_restrictions")]:::rawData
+    end
+
+    %% --- 2. ПРЕДПОДГОТОВКА (Preprocessing) ---
+    subgraph Prep ["2. Дискретизация&nbsp;<br/>(Preprocessing)<br/>&nbsp;"]
+        Split["ST_Subdivide + ST_Segmentize<br/>(Max 500m segments)"]:::process
+        Filter["Group Separation<br/>(Ground vs Bridges)"]:::process
+    end
+
+    %% --- 3. ГРИД-НОДИНГ (Core Build) ---
+    subgraph GridNoding ["3. Сборка топологии<br/>(Grid-Based)"]
+        GridLoop{{"Loop over 0.05° Tiles"}}:::process
+        STNode["ST_Node (In-Memory per Tile)"]:::action
+        SnapToGrid["ST_SnapToGrid (0.000001°)"]:::action
+    end
+
+    %% --- 4. СИНТЕЗ (Synthesis) ---
+    subgraph Synthesis ["4. Генерация графа (Schema GRAPHS)"]
+        direction TB
+        pgrTopo["pgr_createTopology<br/>(Nodes Discovery)"]:::process
+        AttribMap["Attribute Inheritance<br/>(Inherit tags from Ways)"]:::process
+        CostCalc["Weight Matrix Calculation<br/>(Cost/Reverse_Cost)"]:::process
+    end
+
+    %% --- 5. РЕЗУЛЬТАТ ---
+    subgraph Output ["5. Финальный граф"]
+        Nodes[("graphs.nodes")]:::graphData
+        Edges[("graphs.edges")]:::graphData
+    end
+
+    %% === ПОТОКИ ===
+    Ways --> Split
+    Split --> Filter
+    
+    Filter -->|"Ground Edges"| GridLoop
+    GridLoop --> STNode
+    STNode --> SnapToGrid
+    SnapToGrid --> pgrTopo
+    
+    Filter -->|"Bridges (Bypass Noding)"| pgrTopo
+    
+    pgrTopo --> AttribMap
+    AttribMap --> CostCalc
+    
+    CostCalc -->|Bulk Insert| Edges
+    CostCalc -->|Bulk Insert| Nodes
+
+    %% Внешнее влияние (Барьеры)
+    Barriers -.->|"Spatial Update<br/>is_open = false"| Edges
+    Restr -.->|"Logic Metadata<br/>for trsp"| Edges
+</document>
+
+<document filename="02-osm-schema.mmd">
+erDiagram
+    osm_ways {
+        bigint osm_id PK
+        geometry geom "WGS84 (4326)"
+        geometry geom_3857 "Mercator (3857)"
+        jsonb tags "All OSM Tags"
+        text highway "Road Type"
+        text maxspeed
+        int lanes
+    }
+
+    osm_cached_tiles {
+        text tile_key PK "z-x-y or lon-lat"
+        geometry bbox
+        timestamp last_download
+        text status "pending/done"
+    }
+
+    osm_relations {
+        bigint transmission_id PK
+        bigint member_role
+    }
+
+    %% Relationships
+    osm_cached_tiles ||--o{ osm_ways : "contains"
+    osm_ways }|..|{ osm_relations : "member of"
+
+</document>
+
+<document filename="02-tile-loading.mmd">
+flowchart TD
+    %% --- Styles ---
+    classDef client fill:#f9f,stroke:#333;
+    classDef logic fill:#fff0b3,stroke:#f39c12;
+    classDef db fill:#d5e8f7,stroke:#005f9e;
+
+    Start("Start: Receive BBO") --> Split["Split BBOX into 0.05 Tiles"]
+    Split --> Check{"Check DB for Tiles"}
+    
+    Check -->|Exists & Valid| Skip[Skip Download]
+    Check -->|Missing / Old| Queue["Add to Download Queue"]
+    
+    Queue --> Batch["Process Batch (Semaphore limit)"]
+    Batch --> Request["Overpass API Request"]
+    
+    Request -- JSON --> Parse["Parse & Validate"]
+    Parse --> Insert[("Bulk Insert into DB")]
+    
+    Insert --> UpdateStatus["Update Tile Status"]
+    UpdateStatus --> Broadcast["WebSocket: Map Update"]
+
+    Skip --> End(End)
+    Broadcast --> End
+
+</document>
+
+<document filename="03-build-flow.mmd">
+flowchart TD
+    %% --- Styles ---
+    classDef rawData fill:#e1f7d5,stroke:#333;
+    classDef graphData fill:#d5e8f7,stroke:#005f9e;
+    classDef process fill:#fff0b3,stroke:#f39c12;
+
+    %% --- Input ---
+    subgraph Input ["1. Входные данные"]
+        Ways[("osm.ways")]:::rawData
+        Barriers[("osm.barriers")]:::rawData
+    end
+
+    %% --- Preprocessing ---
+    subgraph Prep ["2. Препроцессинг"]
+        Split["ST_Subdivide (Max 500m)"]:::process
+        Filter["Разделение слоев (Ground vs Bridge)"]:::process
+    end
+
+    %% --- Core ---
+    subgraph Core ["3. Грид-Нодинг (Grid Noding)"]
+        Loop{{"Цикл по тайлам 0.05°"}}:::process
+        Node["ST_Node (В памяти)"]:::process
+        Snap["ST_SnapToGrid (1e-6)"]:::process
+    end
+
+    %% --- Synthesis ---
+    subgraph Final ["4. Синтез графа"]
+        Topo["pgr_createTopology"]:::process
+        Attrib["Наследование атрибутов"]:::process
+        Cost["Расчет весов"]:::process
+    end
+
+    %% --- Output ---
+    subgraph Out ["5. Результат"]
+        Edges[("graphs.edges")]:::graphData
+    end
+
+    Ways --> Split --> Filter
+    Filter -->|"Ground"| Loop --> Node --> Snap --> Topo
+    Filter -->|"Bridge"| Topo
+    Topo --> Attrib --> Cost --> Edges
+    Barriers -.->|"Update Cost"| Edges
+
+</document>
+
+<document filename="03-gateway-seq.mmd">
+sequenceDiagram
+    participant C as Client (Qt)
+    participant G as Gateway
+    participant R as Router Service
+    participant D as DB
+
+    Note over C, G: WebSocket Handshake
+    C->>G: CONNECT /ws/route
+    G->>R: CONNECT /ws/route (Proxy)
+    R-->>G: 101 Switching Protocols
+    G-->>C: 101 Switching Protocols
+    
+    Note over C, R: Bidirectional Stream
+    
+    C->>G: JSON: { "points": [A, B] }
+    G->>R: Forward Message
+    
+    R->>D: SQL: Find Path
+    D-->>R: Path Reult
+    
+    R-->>G: JSON: { "status": "calculating", "progress": 50% }
+    G-->>C: Forward Progress
+    
+    R-->>G: JSON: { "route": "geojson..." }
+    G-->>C: Final Result
+    
+    C->>G: CLOSE
+    G->>R: CLOSE
+
+</document>
+
+<document filename="03-graph-schema.mmd">
+erDiagram
+    %% --- Source Data (OSM) ---
+    osm_ways {
+        bigint osm_id PK
+        geometry geom "GiST Index"
+        jsonb tags
+        varchar highway
+        varchar oneway
+    }
+    
+    osm_barriers {
+        bigint id PK
+        geometry geom
+        varchar barrier_type
+    }
+
+    osm_turn_restrictions {
+        bigint id PK
+        bigint from_way_id FK
+        bigint to_way_id FK
+        varchar restriction_type
+    }
+
+    %% --- Routing Graph (Product) ---
+    graphs_nodes {
+        bigint id PK
+        bigint osm_node_id
+        geometry geom "GiST Index"
+    }
+
+    graphs_edges {
+        bigint id PK
+        bigint source_id FK
+        bigint target_id FK
+        bigint osm_way_id FK
+        geometry geometry
+        float cost
+        float reverse_cost
+    }
+
+    %% Relationships
+    graphs_nodes ||--o{ graphs_edges : "source"
+    graphs_nodes ||--o{ graphs_edges : "target"
+    osm_ways ||--o{ graphs_edges : "data source"
+    osm_ways ||--o{ osm_turn_restrictions : "defines"
+
+</document>
+
+<document filename="03-grid-partition.mmd">
+flowchart LR
+    %% --- Styles ---
+    classDef raw fill:#e1f7d5,stroke:#333;
+    classDef tile fill:#fff0b3,stroke:#f39c12;
+    classDef final fill:#d5e8f7,stroke:#005f9e;
+
+    Raw[("OSM Data (228k edges)")]:::raw --> Filter{BBOX Filter}
+    
+    Filter --> T1["Tile 1 (~5k)"]:::tile
+    Filter --> T2["Tile 2 (~5k)"]:::tile
+    Filter --> TN["Tile N (~5k)"]:::tile
+    
+    T1 -->|pgr_nodeNetwork| Topo1["Local Topo 1"]:::tile
+    T2 -->|pgr_nodeNetwork| Topo2["Local Topo 2"]:::tile
+    TN -->|pgr_nodeNetwork| TopoN["Local Topo N"]:::tile
+    
+    Topo1 --> Final[("Final Graph (graphs.edges)")]:::final
+    Topo2 --> Final
+    TopoN --> Final
+
+</document>
+
+<document filename="03-qwebchannel-seq.mmd">
+sequenceDiagram
+    participant Python as Python (MainWindow)
+    participant Channel as QWebChannel
+    participant JS as JavaScript (map-main.js)
+    
+    Note over Python,JS: Инициализация
+    Python->>Channel: Регистрация бриджей (Config, Logger, Zoom)
+    Channel->>JS: Экспонирование объектов
+    JS->>Channel: Polling (setInterval)
+    Channel->>JS: Готовность канала
+    
+    Note over Python,JS: Python -> JavaScript
+    Python->>Python: runJavaScript("window.app.setZoom(12)")
+    Python->>JS: Вызов метода
+    JS->>JS: Выполнение
+    
+    Note over Python,JS: JavaScript -> Python
+    JS->>Channel: zoom_bridge.onZoomChanged(14)
+    Channel->>Python: Вызов слота
+    Python->>Python: _handle_zoom_from_js(14)
+
+</document>
+
+<document filename="03-runtime-flow.mmd">
+flowchart TD
+    %% --- Styles ---
+    classDef client fill:#f9f,stroke:#333;
+    classDef logic fill:#fff0b3,stroke:#f39c12;
+    classDef db fill:#d5e8f7,stroke:#005f9e;
+
+    Start(["GET /route"]):::client --> Snap["Smart Snapping (KNN)"]:::logic
+    Snap --> BBox["Dynamic BBOX (Zone Limit)"]:::logic
+    
+    BBox --> Iter{{"Итерация K?"}}:::logic
+    Iter --> Dijkstra["SQL: pgr_dijkstra (Inside BBOX)"]:::db
+    
+    Dijkstra --> ZigZag["Zig-Zag Fix (ST_Reverse)"]:::logic
+    ZigZag --> Result{{"K путей собрано?"}}:::logic
+    
+    Result -- Нет (Penalty) --> Iter
+    Result -- Да --> Response(["JSON Response"]):::client
+
+</document>
+
+<document filename="04-mvcc-seq.mmd">
+sequenceDiagram
+    participant C1 as Client 1
+    participant API as FastAPI (Async)
+    participant PG as PostgreSQL (MVCC)
+    participant C2 as Client 2
+    
+    C1->>API: GET /route A->B
+    C2->>API: GET /route C->D
+    
+    API->>PG: Query 1 (Start)
+    API->>PG: Query 2 (Start)
+    
+    Note over PG: MVCC: Читатели не блокируют друг друга
+    Note over PG: I/O Wait (Disk) - CPU FREE
+    
+    PG-->>API: Result 1
+    PG-->>API: Result 2
+    
+    API-->>C1: Response A->B
+    API-->>C2: Response C->D
+
+</document>
+
+<document filename="test.mmd">
+%%{
+  init: {
+    "theme": "base",
+    "themeVariables": {
+      "fontSize": "24px",
+      "fontFamily": "GOST2304 Type A",
+      "lineColor": "#000000"
+    },
+    "flowchart": {
+      "htmlLabels": true,
+      "wrappingWidth": 200,
+      "rankSpacing": 60,
+      "padding": 5
+    }
+  }
+}%%
+
+flowchart TD
+    %% --- СТИЛИ ---
+    classDef rawData fill:#e1f7d5,stroke:#333,stroke-width:1px,shape:cylinder;
+    classDef graphData fill:#d5e8f7,stroke:#005f9e,stroke-width:2px,shape:cylinder;
+    classDef process fill:#fff0b3,stroke:#f39c12,stroke-width:2px,shape:rect,rx:5,ry:5;
+    classDef action fill:#fff,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5,shape:hexagon;
+
+    %% --- 1. ВХОДНЫЕ ДАННЫЕ ---
+    subgraph Input ["1. Входной слой&nbsp;<br/>(Schema OSM)<br/>&nbsp;"]
+        direction TB
+        Ways[("osm.ways")]:::rawData
+        Barriers[("osm.barriers")]:::rawData
+        Restr[("osm.turn_restrictions")]:::rawData
+    end
+
+    %% --- 2. ПРЕДПОДГОТОВКА (Preprocessing) ---
+    subgraph Prep ["2. Дискретизация&nbsp;<br/>(Preprocessing)<br/>&nbsp;"]
+        Split["ST_Subdivide + ST_Segmentize<br/>(Max 500m segments)"]:::process
+        Filter["Group Separation<br/>(Ground vs Bridges)"]:::process
+    end
+
+    %% --- 3. ГРИД-НОДИНГ (Core Build) ---
+    subgraph GridNoding ["3. Сборка топологии<br/>(Grid-Based)"]
+        GridLoop{{"Loop over 0.05° Tiles"}}:::process
+        STNode["ST_Node (In-Memory per Tile)"]:::action
+        SnapToGrid["ST_SnapToGrid (0.000001°)"]:::action
+    end
+
+    %% --- 4. СИНТЕЗ (Synthesis) ---
+    subgraph Synthesis ["4. Генерация графа (Schema GRAPHS)"]
+        direction TB
+        pgrTopo["pgr_createTopology<br/>(Nodes Discovery)"]:::process
+        AttribMap["Attribute Inheritance<br/>(Inherit tags from Ways)"]:::process
+        CostCalc["Weight Matrix Calculation<br/>(Cost/Reverse_Cost)"]:::process
+    end
+
+    %% --- 5. РЕЗУЛЬТАТ ---
+    subgraph Output ["5. Финальный граф"]
+        Nodes[("graphs.nodes")]:::graphData
+        Edges[("graphs.edges")]:::graphData
+    end
+
+    %% === ПОТОКИ ===
+    Ways --> Split
+    Split --> Filter
+    
+    Filter -->|"Ground Edges"| GridLoop
+    GridLoop --> STNode
+    STNode --> SnapToGrid
+    SnapToGrid --> pgrTopo
+    
+    Filter -->|"Bridges (Bypass Noding)"| pgrTopo
+    
+    pgrTopo --> AttribMap
+    AttribMap --> CostCalc
+    
+    CostCalc -->|Bulk Insert| Edges
+    CostCalc -->|Bulk Insert| Nodes
+
+    %% Внешнее влияние (Барьеры)
+    Barriers -.->|"Spatial Update<br/>is_open = false"| Edges
+    Restr -.->|"Logic Metadata<br/>for trsp"| Edges
+</document>

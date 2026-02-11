@@ -1,0 +1,20 @@
+sequenceDiagram
+    participant Python as Python (MainWindow)
+    participant Channel as QWebChannel
+    participant JS as JavaScript (map-main.js)
+    
+    Note over Python,JS: Инициализация
+    Python->>Channel: Регистрация бриджей (Config, Logger, Zoom)
+    Channel->>JS: Экспонирование объектов
+    JS->>Channel: Polling (setInterval)
+    Channel->>JS: Готовность канала
+    
+    Note over Python,JS: Python -> JavaScript
+    Python->>Python: runJavaScript("window.app.setZoom(12)")
+    Python->>JS: Вызов метода
+    JS->>JS: Выполнение
+    
+    Note over Python,JS: JavaScript -> Python
+    JS->>Channel: zoom_bridge.onZoomChanged(14)
+    Channel->>Python: Вызов слота
+    Python->>Python: _handle_zoom_from_js(14)
