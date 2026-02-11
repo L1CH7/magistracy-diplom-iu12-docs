@@ -3,4 +3,4 @@ build/
 *.fls
 *.fdb_latexmk
 
-assets/**/*.pdf
+assets/diagrams/*.pdf

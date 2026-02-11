@@ -190,24 +190,96 @@ routes:
 В отличие от классического подхода, где фильтрация происходит на клиенте (скрытие слоев через CSS), система реализует \textit{динамическую генерацию тайлов}. При запросе тайла сервер Data Processor проверяет текущий уровень масштабирования (Zoom Level) и модифицирует SQL-запрос к базе данных, исключая геометрию второстепенных дорог, невидимых на данном масштабе. Это позволяет радикально снизить объем передаваемых данных (размер MVT-тайла) и нагрузку на клиентский рендеринг.
 
 Эффект от применения LOD продемонстрирован на рисунке~\ref{fig:client-lod}:
-\begin{itemize}
-    \item \textbf{(а) z9:} Отображаются только магистрали федерального значения (Motorway, Trunk).
-    \item \textbf{(б) z11:} Добавляются дороги регионального значения (Primary, Secondary).
-    \item \textbf{(в) z13:} Становится видна основная уличная сеть.
-    \item \textbf{(г) z15:} Загружается полная геометрия, включая дворовые проезды и служебные дороги.
-\end{itemize}
+% \begin{itemize}
+%     \item \textbf{(а) z9:} Отображаются только магистрали федерального значения (Motorway, Trunk).
+%     \item \textbf{(б) z11:} Добавляются дороги регионального значения (Primary, Secondary).
+%     \item \textbf{(в) z13:} Становится видна основная уличная сеть.
+%     \item \textbf{(г) z15:} Загружается полная геометрия, включая дворовые проезды и служебные дороги.
+% \end{itemize}
+
+% \begin{figure}[H]
+%     \centering
+%     \begin{tabular}{cc}
+%         \includegraphics[width=0.45\linewidth]{gui-lod-1} & \includegraphics[width=0.45\linewidth]{gui-lod-2} \\
+%         \small (а) Низкий масштаб (z9) & \small (б) Средний масштаб (z11) \\
+%         \includegraphics[width=0.45\linewidth]{gui-lod-3} & \includegraphics[width=0.45\linewidth]{gui-lod-4} \\
+%         \small (в) Высокий масштаб (z13) & \small (г) Максимальная детализация (z15)
+%     \end{tabular}
+%     \caption{Демонстрация работы системы LOD: прогрессивная детализация дорожной сети. (а)~z9~--- отображаются только магистрали федерального значения (Motorway, Trunk); (б)~z11~--- добавляются дороги регионального значения (Primary, Secondary); (в)~z13~--- становится видна основная уличная сеть; (г)~z15~--- загружается полная геометрия, включая дворовые проезды и служебные дороги.}
+%     \label{fig:client-lod}
+% \end{figure}
 
 \begin{figure}[H]
     \centering
-    \begin{tabular}{cc}
-        \includegraphics[width=0.45\linewidth]{gui-lod-1} & \includegraphics[width=0.45\linewidth]{gui-lod-2} \\
-        \small (а) Низкий масштаб (z9) & \small (б) Средний масштаб (z11) \\
-        \includegraphics[width=0.45\linewidth]{gui-lod-3} & \includegraphics[width=0.45\linewidth]{gui-lod-4} \\
-        \small (в) Высокий масштаб (z13) & \small (г) Максимальная детализация (z15)
-    \end{tabular}
+    
+    % --- Первая строка ---
+    \begin{subfigure}[t]{0.48\linewidth} % Ширина чуть меньше половины
+        \centering
+        \includegraphics[width=\linewidth]{gui-lod-1}
+        \caption{Низкий масштаб (z9): только магистрали (Motorway, Trunk)}
+        \label{fig:lod-z9}
+    \end{subfigure}
+    \hfill % Пружинка между картинками
+    \begin{subfigure}[t]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{gui-lod-2}
+        \caption{Средний масштаб (z11): дороги регионального значения}
+        \label{fig:lod-z11}
+    \end{subfigure}
+    
+    \vspace{1em} % Отступ между рядами
+    
+    % --- Вторая строка ---
+    \begin{subfigure}[t]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{gui-lod-3}
+        \caption{Высокий масштаб (z13): основная уличная сеть}
+        \label{fig:lod-z13}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{gui-lod-4}
+        \caption{Максимальная детализация (z15): дворы и проезды}
+        \label{fig:lod-z15}
+    \end{subfigure}
+    
+    % --- Общая подпись ---
     \caption{Демонстрация работы системы LOD: прогрессивная детализация дорожной сети}
     \label{fig:client-lod}
 \end{figure}
+
+\subsection{Атрибутивный состав и визуальное кодирование}
+
+Для обеспечения визуальной различимости классов дорог на карте применяется цветовое кодирование, заданное в конфигурации стилей \texttt{map.rendering.yaml}. Каждому типу дороги (tag \texttt{highway}) соответствует уникальный цвет и базовый вес линии.
+
+\begin{table}[H]
+    \centering
+    \caption{Цветовое кодирование типов дорог и скоростной режим}
+    \label{tab:road-attributes}
+    \begin{tabular}{|l|l|c|}
+        \hline
+        \textbf{Тип дороги (OSM tag)} & \textbf{Цвет (HEX)} & \textbf{Speed Default (км/ч)} \\ \hline
+        Motorway & \textcolor[HTML]{1E40AF}{\rule{1cm}{3mm}} \#1E40AF (Dark Blue) & 110 \\ \hline
+        Trunk & \textcolor[HTML]{6200FF}{\rule{1cm}{3mm}} \#6200FF (Purple) & 110 \\ \hline
+        Primary & \textcolor[HTML]{9C00AA}{\rule{1cm}{3mm}} \#9C00AA (Magenta) & 60 \\ \hline
+        Secondary & \textcolor[HTML]{FF5EFF}{\rule{1cm}{3mm}} \#FF5EFF (Pink) & 60 \\ \hline
+        Tertiary & \textcolor[HTML]{FF2E2E}{\rule{1cm}{3mm}} \#FF2E2E (Red) & 60 \\ \hline
+        Unclassified & \textcolor[HTML]{5C5C5C}{\rule{1cm}{3mm}} \#5C5C5C (Gray) & 60 \\ \hline
+        Residential / Living & \textcolor[HTML]{FF8635}{\rule{1cm}{3mm}} \#FF8635 (Orange) & 20 \\ \hline
+        Service & \textcolor[HTML]{008D0C}{\rule{1cm}{3mm}} \#008D0C (Green) & 20 \\ \hline
+    \end{tabular}
+\end{table}
+
+Важной особенностью реализации является стратегия обработки неполных данных. В исходном наборе OSM тег \texttt{maxspeed} часто отсутствует. Для обеспечения связности маршрутизации система применяет детерминированную логику присвоения скоростей на этапе импорта данных (в методе \texttt{fill\_graph\_tables} сервиса Router).
+
+В текущей версии значения скоростей жестко зафиксированы в коде (`services/router/src/db\_manager.py`) и не зависят от внешних конфигурационных файлов, что гарантирует предсказуемость построения графа:
+\begin{itemize}
+    \item \textbf{110 км/ч:} Скоростные магистрали (Motorway, Trunk).
+    \item \textbf{60 км/ч:} Городская дорожная сеть (Primary, Secondary, Tertiary, Unclassified). Значение выбрано как стандартное ограничение скорости в населенных пунктах РФ.
+    \item \textbf{20 км/ч:} Жилые зоны (Residential, Living Street) и служебные проезды (Service).
+\end{itemize}
+Это позволяет избежать артефактов маршрутизации, когда алгоритм Дейкстры выбирает дворовый проезд вместо улицы из-за отсутствия данных о скорости.
 
 \subsection{Рендеринг векторных тайлов (MVT)}
 Для корректного отображения сложной городской застройки (мосты над дорогами, тоннели) на стороне клиента реализована сортировка объектов по Z-индексу (Z-Order). Векторные тайлы, генерируемые сервером, содержат атрибут \texttt{layer}, который используется стилями MapLibre GL JS для определения порядка отрисовки. Без этого механизма дороги могли бы визуально перекрывать мосты, проходящие под ними.

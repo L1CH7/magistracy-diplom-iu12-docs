@@ -24,13 +24,26 @@
     {Масленников~А.~Л.} % ФИО научного руководителя
     {} % ФИО консультанта (необязательный аргумент; если консультантов несколько, их необходимо разделить запятой)
 
+% Вставляем ТЗ. Оно займет свои страницы. 
+% Нумерация в дипломе "проглотит" эти страницы (учтет их количество), 
+% но цифры на них печатать не будет.
+\insertTask{assets/pdf/ИУ12-11М_Иванов_В.И._ТЗ_НИР-1.pdf}
+
 \maketableofcontents
 
+% Список сокращений
+\input{chapters/00-abbreviations}
+
+% Основные главы
 \input{chapters/00-intro}
 \input{chapters/01-analysis}
 \input{chapters/02-research}
 \input{chapters/03-implementation}
 \input{chapters/04-testing}
 \input{chapters/05-conclusion}
+
+% ВСТАВКА БИБЛИОГРАФИИ
+\nocite{*}
+\makebibliography
 
 \end{document}
