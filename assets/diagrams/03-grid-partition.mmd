@@ -1,19 +1,23 @@
 flowchart LR
-    %% --- Styles ---
+    %% --- Стили ---
     classDef raw fill:#e1f7d5,stroke:#333;
-    classDef tile fill:#fff0b3,stroke:#f39c12;
-    classDef final fill:#d5e8f7,stroke:#005f9e;
+    classDef proc fill:#fff0b3,stroke:#f39c12;
+    classDef db fill:#d5e8f7,stroke:#005f9e;
 
-    Raw[("OSM Data (228k edges)")]:::raw --> Filter{BBOX Filter}
+    %% 1. Вход
+    BigData[("Большой файл OSM<br/>(Вся область)")]:::raw --> Splitter{Нарезка области<br/>на тайлы}
     
-    Filter --> T1["Tile 1 (~5k)"]:::tile
-    Filter --> T2["Tile 2 (~5k)"]:::tile
-    Filter --> TN["Tile N (~5k)"]:::tile
+    %% 2. Параллельная нарезка
+    Splitter --> Chunk1["Тайл №1<br/>(ОЗУ)"]:::proc
+    Splitter --> Chunk2["Тайл №2<br/>(ОЗУ)"]:::proc
+    Splitter --> ChunkN["Тайл №N<br/>(ОЗУ)"]:::proc
     
-    T1 -->|pgr_nodeNetwork| Topo1["Local Topo 1"]:::tile
-    T2 -->|pgr_nodeNetwork| Topo2["Local Topo 2"]:::tile
-    TN -->|pgr_nodeNetwork| TopoN["Local Topo N"]:::tile
+    %% 3. Логика (Grid Noding)
+    Chunk1 -->|Поиск перекрестков| Node1["Обработанные сегменты"]:::proc
+    Chunk2 -->|Поиск перекрестков| Node2["Обработанные сегменты"]:::proc
+    ChunkN -->|Поиск перекрестков| NodeN["Обработанные сегменты"]:::proc
     
-    Topo1 --> Final[("Final Graph (graphs.edges)")]:::final
-    Topo2 --> Final
-    TopoN --> Final
+    %% 4. Сборка
+    Node1 --> Merge[("Единая таблица ребер<br/>(graphs.edges)")]:::db
+    Node2 --> Merge
+    NodeN --> Merge

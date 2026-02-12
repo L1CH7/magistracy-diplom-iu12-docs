@@ -1,45 +1,67 @@
 erDiagram
-    %% --- Source Data (OSM) ---
+    %% --- Слой 1: Исходные данные (OSM) ---
     osm_ways {
-        bigint osm_id PK
-        geometry geom "GiST Index"
+        bigint id PK "Внутренний ID"
+        bigint osm_id "Реальный OSM ID"
+        geometry geom "LineString(4326)"
+        geometry geom_3857 "Mercator"
         jsonb tags
         varchar highway
+        varchar maxspeed
         varchar oneway
+        int lanes
     }
     
     osm_barriers {
         bigint id PK
-        geometry geom
+        bigint osm_id
+        geometry geom "Point(4326)"
         varchar barrier_type
+        varchar access
+        varchar motor_vehicle
     }
 
     osm_turn_restrictions {
         bigint id PK
-        bigint from_way_id FK
-        bigint to_way_id FK
-        varchar restriction_type
+        bigint from_way_id
+        bigint to_way_id
+        text restriction_type
     }
 
-    %% --- Routing Graph (Product) ---
+    %% --- Слой 2: Маршрутный граф (Routing) ---
     graphs_nodes {
         bigint id PK
         bigint osm_node_id
-        geometry geom "GiST Index"
+        geometry geom "Point(4326)"
+        varchar region
     }
 
     graphs_edges {
-        bigint id PK
-        bigint source_id FK
-        bigint target_id FK
-        bigint osm_way_id FK
-        geometry geometry
-        float cost
+        integer id PK
+        bigint source_id FK "-> graphs.nodes"
+        bigint target_id FK "-> graphs.nodes"
+        bigint osm_way_id FK "-> osm.ways(osm_id)"
+        geometry geometry "LineString(4326)"
+        
+        %% Статические веса
+        float cost "Базовый вес"
         float reverse_cost
+        float length_m
+        float speed_limit_kmh
+        
+        %% Динамические атрибуты (Key Feature)
+        boolean is_open "Доступность ребра"
+        int current_load "Текущая загрузка"
+        float effective_speed_kmh "Реальная скорость"
     }
 
-    %% Relationships
+    %% --- Связи (Только реальные FK) ---
+    %% Узлы связаны с ребрами
     graphs_nodes ||--o{ graphs_edges : "source"
     graphs_nodes ||--o{ graphs_edges : "target"
-    osm_ways ||--o{ graphs_edges : "data source"
-    osm_ways ||--o{ osm_turn_restrictions : "defines"
+    
+    %% Ребра знают, из какой линии OSM они сделаны
+    osm_ways ||--o{ graphs_edges : "lineage (osm_way_id)"
+    
+    %% Ограничения поворотов ссылаются на линии (логически)
+    osm_ways ||--o{ osm_turn_restrictions : "reference"

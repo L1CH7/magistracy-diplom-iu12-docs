@@ -1,33 +1,40 @@
-flowchart TB
-    User((User))
-    
-    subgraph Client [Qt Client Application]
-        UI[PyQt Interface]
-        Map[MapLibre GL JS]
+flowchart TD
+    %% --- Стили ---
+    classDef client fill:#f9f,stroke:#333;
+    classDef backend fill:#fff0b3,stroke:#f39c12;
+    classDef db fill:#d5e8f7,stroke:#005f9e;
+    classDef ext fill:#e1f7d5,stroke:#27ae60,stroke-dasharray: 5 5;
+
+    User((Пользователь))
+
+    subgraph ClientHost ["Клиентская станция (Desktop)"]
+        UI["GUI Интерфейс<br/>(PyQt5)"]:::client
+        MapLibre["Картографическое ядро<br/>(MapLibre GL JS)"]:::client
     end
 
-    subgraph Backend [Backend Infrastructure]
-        Gateway[API Gateway]
-        Router[Router Service]
-        DP[Data Processor]
+    subgraph Docker ["Серверный контур (Docker Compose)"]
+        Gateway["API Gateway<br/>(Единая точка входа)"]:::backend
+        Router["Router Service<br/>(Поиск пути)"]:::backend
+        DP["Data Processor<br/>(Загрузчик тайлов)"]:::backend
+        
+        DB["PostgreSQL<br/>(PostGIS + pgRouting)"]:::db
     end
 
-    subgraph Storage [Data Layer]
-        DB["(PostgreSQL<br/>PostGIS + pgRouting)"]
+    subgraph External ["Внешние источники"]
+        Overpass["Overpass API<br/>(OSM Data)"]:::ext
     end
 
-    subgraph External [External Services]
-        OSM[Overpass API]
-    end
-
+    %% Связи
     User --> UI
-    UI --> Map
-    UI --> Gateway
-    Map --> Gateway
+    UI -->|"QWebChannel (IPC)"| MapLibre
+    
+    UI -->|"HTTP/WebSocket"| Gateway
+    MapLibre -->|"HTTP (Tiles)"| Gateway
 
-    Gateway -- REST/WS --> Router
-    Gateway -- REST --> DP
+    Gateway -->|"Proxy"| Router
+    Gateway -->|"Proxy"| DP
 
-    Router --> DB
-    DP --> DB
-    DP --> OSM
+    Router -->|"SQL (asyncpg)"| DB
+    DP -->|"SQL (asyncpg)"| DB
+    
+    DP -.->|"Download JSON"| Overpass

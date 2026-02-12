@@ -1,20 +1,40 @@
 sequenceDiagram
-    participant Python as Python (MainWindow)
-    participant Channel as QWebChannel
-    participant JS as JavaScript (map-main.js)
+    participant Py as Python (PyQt5 Backend)
+    participant IPC as QWebChannel (Transport)
+    participant JS as JavaScript (Frontend)
+
+    Note over Py, JS: Инициализация (Injection)
+    %% Добавили регистрацию config, чтобы билось с текстом
+    Py->>IPC: registerObject("config", config_bridge)
+    Py->>IPC: registerObject("logger", logger_bridge)
+    Py->>IPC: registerObject("zoom", zoom_bridge)
+    IPC->>JS: Инъекция объекта window.qt
     
-    Note over Python,JS: Инициализация
-    Python->>Channel: Регистрация бриджей (Config, Logger, Zoom)
-    Channel->>JS: Экспонирование объектов
-    JS->>Channel: Polling (setInterval)
-    Channel->>JS: Готовность канала
-    
-    Note over Python,JS: Python -> JavaScript
-    Python->>Python: runJavaScript("window.app.setZoom(12)")
-    Python->>JS: Вызов метода
-    JS->>JS: Выполнение
-    
-    Note over Python,JS: JavaScript -> Python
-    JS->>Channel: zoom_bridge.onZoomChanged(14)
-    Channel->>Python: Вызов слота
-    Python->>Python: _handle_zoom_from_js(14)
+    activate JS
+    JS->>IPC: new QWebChannel(qt.webChannelTransport)
+    IPC-->>JS: Канал готов (Ready)
+    deactivate JS
+
+    %% Сценарий 1: Логирование (Data Stream)
+    Note over Py, JS: Сценарий 1: Перехват логов
+    JS->>JS: console.error("Tile Error")
+    JS->>IPC: logger.log("Tile Error")
+    IPC->>Py: Вызов слота: log_message(...)
+    Py->>Py: Запись в systemd/file
+
+    %% Сценарий 2: Реакция (Event Driven)
+    Note over Py, JS: Сценарий 2: Синхронизация LOD
+    JS->>JS: map.on('zoomend')
+    JS->>IPC: zoom.onZoomChanged(14.5)
+    IPC->>Py: Вызов слота: update_zoom(14.5)
+    activate Py
+    Py->>Py: Пересчет стратегии LOD
+    deactivate Py
+
+    %% Сценарий 3: Управление (RPC)
+    Note over Py, JS: Сценарий 3: Управление камерой
+    Py->>Py: Клик по маршруту
+    Py->>JS: runJavaScript("map.flyTo({...})")
+    activate JS
+    JS->>JS: WebGL Animation
+    deactivate JS

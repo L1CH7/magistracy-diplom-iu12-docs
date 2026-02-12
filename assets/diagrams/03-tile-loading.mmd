@@ -1,0 +1,28 @@
+flowchart TD
+    %% --- Стили ---
+    classDef request fill:#f9f,stroke:#333;
+    classDef process fill:#fff0b3,stroke:#f39c12;
+    classDef response fill:#d5e8f7,stroke:#005f9e;
+    classDef async fill:#e1f7d5,stroke:#27ae60,stroke-dasharray: 5 5;
+
+    %% 1. Вход
+    In([Входящий запрос GET]):::request --> GeoCheck{Пересечение с<br/>полигоном?}:::process
+
+    %% 2. Гео-фильтр
+    GeoCheck -- Нет (Пусто) --> Res204[HTTP 204 No Content]:::response
+
+    %% 3. Проверка БД
+    GeoCheck -- Да --> DBCheck{Статус в БД?}:::process
+
+    %% 4. Ветка: Готово
+    DBCheck -- Ready --> Res200["HTTP 200 OK<br/>(Бинарный MVT)"]:::response
+
+    %% 5. Ветка: Нужно качать
+    DBCheck -- Missing / Pending --> Task["Создать задачу<br/>(INSERT pending)"]:::process
+    Task --> Res202[HTTP 202 Accepted]:::response
+
+    %% 6. Фоновый поток
+    Task -.-> Worker([Фоновый воркер]):::async
+    Worker --> Download[Загрузка OSM]:::async
+    Download --> Gen[Генерация MVT]:::async
+    Gen --> Notify[WebSocket: TILE_READY]:::async

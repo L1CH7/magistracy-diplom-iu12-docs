@@ -1,28 +1,45 @@
 sequenceDiagram
-    participant C as Client (Qt)
-    participant G as Gateway
-    participant R as Router Service
-    participant D as DB
+    participant C as Клиент (Qt/JS)
+    participant G as Gateway (Proxy)
+    participant DP as Data Processor
+    participant DB as PostGIS
 
-    Note over C, G: WebSocket Handshake
-    C->>G: CONNECT /ws/route
-    G->>R: CONNECT /ws/route (Proxy)
-    R-->>G: 101 Switching Protocols
+    Note over C, G: Подключение к каналу обновлений
+    C->>G: CONNECT /ws/data_updates
+    G->>DP: Проксирование (ws_proxy.py)
+    DP-->>G: 101 Switching Protocols
     G-->>C: 101 Switching Protocols
     
-    Note over C, R: Bidirectional Stream
+    Note over C, DP: Туннель установлен (Bidirectional)
     
-    C->>G: JSON: { "points": [A, B] }
-    G->>R: Forward Message
+    %% Сценарий 1: Управление конфигурацией
+    C->>G: JSON: { "type": "config", "lod": {...} }
+    G->>DP: Forward Config
+    activate DP
+    Note over DP: Обновление настроек LOD
+    DP-->>G: JSON: { "type": "ack" }
+    G-->>C: Подтверждение (Ack)
+    deactivate DP
     
-    R->>D: SQL: Find Path
-    D-->>R: Path Reult
+    %% Сценарий 2: Реакция на изменение данных (МАССИВНАЯ ЧАСТЬ)
+    Note over DB: Фоновый процесс:<br/>Импорт OSM завершен
+    DB-->>DP: Commit Transaction
+    activate DP
+    DP->>DP: Генерация события
+    par Асинхронная рассылка уведомлений
+        DP->>G: JSON: { "type": "tiles_invalidated" }
+        G->>C: Event: Cache Clear
+        C->>C: Перерисовка карты
+    and Метрики
+        DP->>G: JSON: { "type": "ways_updated", "count": 5000 }
+        G->>C: Event: Stats Update
+    end
+    deactivate DP
     
-    R-->>G: JSON: { "status": "calculating", "progress": 50% }
-    G-->>C: Forward Progress
-    
-    R-->>G: JSON: { "route": "geojson..." }
-    G-->>C: Final Result
-    
-    C->>G: CLOSE
-    G->>R: CLOSE
+    %% Сценарий 3: Heartbeat
+    loop Heartbeat (Keep-Alive)
+        C->>G: "ping"
+        G->>DP: "ping"
+        DP-->>G: {"type": "pong"}
+        G-->>C: {"type": "pong"}
+    end

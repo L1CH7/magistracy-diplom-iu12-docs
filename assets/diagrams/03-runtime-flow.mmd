@@ -1,17 +1,35 @@
 flowchart TD
-    %% --- Styles ---
+    %% --- Стили ---
     classDef client fill:#f9f,stroke:#333;
     classDef logic fill:#fff0b3,stroke:#f39c12;
     classDef db fill:#d5e8f7,stroke:#005f9e;
 
-    Start(["GET /route"]):::client --> Snap["Smart Snapping (KNN)"]:::logic
-    Snap --> BBox["Dynamic BBOX (Zone Limit)"]:::logic
+    %% 1. Вход
+    Start([Входящий запрос GET]):::client --> Snap["Smart Snapping<br/>(KNN поиск узлов)"]:::logic
+
+    %% 2. Подготовка зоны
+    Snap --> BBox["Расчет Dynamic BBOX<br/>(Отступ 30%)"]:::logic
     
-    BBox --> Iter{{"Итерация K?"}}:::logic
-    Iter --> Dijkstra["SQL: pgr_dijkstra (Inside BBOX)"]:::db
+    %% 3. Цикл поиска
+    BBox --> InitLoop{{"Цикл (i < K)"}}:::logic
     
-    Dijkstra --> ZigZag["Zig-Zag Fix (ST_Reverse)"]:::logic
-    ZigZag --> Result{{"K путей собрано?"}}:::logic
+    InitLoop -- "Да" --> SQL["SQL: pgr_dijkstra<br/>(С учетом штрафов)"]:::db
     
-    Result -- Нет (Penalty) --> Iter
-    Result -- Да --> Response(["JSON Response"]):::client
+    InitLoop -- "Нет (Готово)" --> Response([JSON Response]):::client
+    
+    SQL --> Found{{"Путь найден?"}}:::logic
+    
+    %% Ветка: Не нашли
+    Found -- "Нет" --> Break[Прерывание цикла]:::logic
+    
+    %% Ветка: Нашли (с фиксом геометрии)
+    Found -- "Да" --> Orient["Коррекция ориентации<br/>(ST_Reverse при обратном ходе)"]:::logic
+    Orient --> Geom["Сборка линии<br/>(ST_MakeLine)"]:::logic
+    
+    Geom --> Penalty["Обновление штрафов<br/>(Iterative Penalty)"]:::logic
+    Penalty --> AddList[Добавление в список]:::logic
+    
+    AddList --> InitLoop
+
+    %% 4. Выход
+    Break --> Response

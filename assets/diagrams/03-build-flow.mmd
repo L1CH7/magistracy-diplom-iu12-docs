@@ -1,42 +1,68 @@
-flowchart TD
-    %% --- Styles ---
-    classDef rawData fill:#e1f7d5,stroke:#333;
-    classDef graphData fill:#d5e8f7,stroke:#005f9e;
-    classDef process fill:#fff0b3,stroke:#f39c12;
+stateDiagram-v2
+    direction TB
 
-    %% --- Input ---
-    subgraph Input ["1. Входные данные"]
-        Ways[("osm.ways")]:::rawData
-        Barriers[("osm.barriers")]:::rawData
-    end
+    %% Начальное состояние
+    state "1. Сырые данные (OSM)" as Raw
+    [*] --> Raw
 
-    %% --- Preprocessing ---
-    subgraph Prep ["2. Препроцессинг"]
-        Split["ST_Subdivide (Max 500m)"]:::process
-        Filter["Разделение слоев (Ground vs Bridge)"]:::process
-    end
+    %% Блок Препроцессинга (Вставка в edge_candidates)
+    state "2. Геометрический препроцессинг" as Prep {
+        direction LR
+        Segmentize: ST_Segmentize (50m)
+        Subdivide: ST_Subdivide (Нарезка)
+        Snap: ST_SnapToGrid (Привязка)
+        
+        Segmentize --> Subdivide
+        Subdivide --> Snap
+    }
 
-    %% --- Core ---
-    subgraph Core ["3. Грид-Нодинг (Grid Noding)"]
-        Loop{{"Цикл по тайлам 0.05°"}}:::process
-        Node["ST_Node (В памяти)"]:::process
-        Snap["ST_SnapToGrid (1e-6)"]:::process
-    end
+    Raw --> Prep
 
-    %% --- Synthesis ---
-    subgraph Final ["4. Синтез графа"]
-        Topo["pgr_createTopology"]:::process
-        Attrib["Наследование атрибутов"]:::process
-        Cost["Расчет весов"]:::process
-    end
+    %% Развилка логики (Layer Logic)
+    state "Тип объекта?" as LayerCheck
 
-    %% --- Output ---
-    subgraph Out ["5. Результат"]
-        Edges[("graphs.edges")]:::graphData
-    end
+    Prep --> LayerCheck
 
-    Ways --> Split --> Filter
-    Filter -->|"Ground"| Loop --> Node --> Snap --> Topo
-    Filter -->|"Bridge"| Topo
-    Topo --> Attrib --> Cost --> Edges
-    Barriers -.->|"Update Cost"| Edges
+    %% Ветка Земли (Сложная обработка)
+    state "3A. Обработка земли (Grid Noding)" as Ground {
+        direction LR
+        GridLoop: Цикл по секторам
+        Node: ST_Node (Поиск пересечений)
+        dedup: Дедупликация
+        
+        GridLoop --> Node
+        Node --> dedup
+    }
+
+    %% Ветка Мостов (Простая обработка)
+    state "3B. Изолированный слой" as Bridge {
+        Copy: Direct Copy (Без узлования)
+        note right of Copy
+            Мосты и тоннели
+            не образуют
+            перекрестков
+        end note
+    }
+
+    %% Маршрутизация потоков
+    LayerCheck --> Ground: Ground (Земля)
+    LayerCheck --> Bridge: Isolated (Мосты)
+
+    %% Финальная сборка
+    state "4. Синтез графа" as Final {
+        direction LR
+        Merge: Слияние (Merge Tables)
+        Topo: pgr_createTopology
+        Physics: Расчет скоростей и весов
+        
+        Merge --> Topo
+        Topo --> Physics
+    }
+
+    Ground --> Final
+    Bridge --> Final
+
+    %% Результат
+    state "5. Готовый граф (graphs.edges)" as Result
+    Final --> Result
+    Result --> [*]
