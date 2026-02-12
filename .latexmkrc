@@ -14,11 +14,13 @@ $xelatex = 'mkdir -p build/chapters && xelatex -synctex=1 -interaction=nonstopmo
 # 4. Пути к стилям (шаблон + локальные ассеты)
 ensure_path('TEXINPUTS', './latex-iu1-template/lib//:./assets//');
 
-sub ensure_path {
-    my ($var, $path) = @_;
-    my $sep = ($^O eq 'MSWin32') ? ';' : ':';
-    if ($ENV{$var}) { $ENV{$var} = $path . $sep . $ENV{$var}; }
-    else { $ENV{$var} = $path . $sep; }
+if ( !defined &ensure_path ) {
+    sub ensure_path {
+        my ($var, $path) = @_;
+        my $sep = ($^O eq 'MSWin32') ? ';' : ':';
+        if ($ENV{$var}) { $ENV{$var} = $path . $sep . $ENV{$var}; }
+        else { $ENV{$var} = $path . $sep; }
+    }
 }
 
 # 5. Очистка

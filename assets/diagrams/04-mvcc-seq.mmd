@@ -1,20 +1,30 @@
 sequenceDiagram
-    participant C1 as Client 1
-    participant API as FastAPI (Async)
+    participant C1 as Клиент 1
+    participant C2 as Клиент 2
+    participant API as FastAPI (Event Loop)
     participant PG as PostgreSQL (MVCC)
-    participant C2 as Client 2
+
+    Note over API: Один поток (Single Thread)
+
+    C1->>API: GET /route (Req A)
+    API->>PG: BEGIN SELECT ... (Req A)
+    Note right of API: await db.fetch()<br/>Yield Control
     
-    C1->>API: GET /route A->B
-    C2->>API: GET /route C->D
-    
-    API->>PG: Query 1 (Start)
-    API->>PG: Query 2 (Start)
-    
-    Note over PG: MVCC: Читатели не блокируют друг друга
-    Note over PG: I/O Wait (Disk) - CPU FREE
-    
-    PG-->>API: Result 1
-    PG-->>API: Result 2
-    
-    API-->>C1: Response A->B
-    API-->>C2: Response C->D
+    C2->>API: GET /route (Req B)
+    API->>PG: BEGIN SELECT ... (Req B)
+    Note right of API: await db.fetch()<br/>Yield Control
+
+    rect rgb(245, 245, 245)
+        Note over PG: Параллельное выполнение (Physical Parallelism)
+        Note over PG: Снимок транзакции A (Snapshot)
+        Note over PG: Снимок транзакции B (Snapshot)
+        PG->>PG: Index Scan A (Disk I/O)
+        PG->>PG: Index Scan B (Disk I/O)
+        Note over PG: MVCC: Чтение без блокировок
+    end
+
+    PG-->>API: Результат A
+    API-->>C1: Ответ A
+
+    PG-->>API: Результат B
+    API-->>C2: Ответ B
