@@ -37,12 +37,13 @@ stateDiagram-v2
     %% Ветка Мостов (Простая обработка)
     state "3B. Изолированный слой" as Bridge {
         Copy: Direct Copy (Без узлования)
-        note right of Copy
-            Мосты и тоннели
-            не образуют
-            перекрестков
-        end note
     }
+    
+    note right of Bridge
+        Мосты и тоннели
+        не образуют
+        перекрестков
+    end note
 
     %% Маршрутизация потоков
     LayerCheck --> Ground: Ground (Земля)
