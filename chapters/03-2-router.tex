@@ -26,7 +26,7 @@ LIMIT 1
 \textbf{Этап 2: Динамическая область поиска.}
 Реализация механизма (\ref{eq:dynamic-bbox}), описанного в первой главе, выполнена на уровне SQL-запроса (листинг \ref{lst:dynamic-bbox-sql}).
 
-\begin{code}{dynamic-bbox-sql}{SQL}{Расчет динамического BBox (pgrouting\_engine.py)}
+\begin{code}{dynamic-bbox-sql}{SQL}{Расчет динамического ограничивающего прямоугольника (pgrouting\_engine.py)}
 SELECT ST_Expand(
     ST_Envelope(ST_MakeLine(start_n.geom, end_n.geom)), 
     -- Минимальный буфер 0.015 град., иначе 30% от дистанции
