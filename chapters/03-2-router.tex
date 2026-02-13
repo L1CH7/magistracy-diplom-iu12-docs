@@ -24,7 +24,7 @@ LIMIT 1
 \end{code}
 
 \textbf{Этап 2: Динамическая область поиска.}
-Реализация эвристики (\ref{eq:dynamic-bbox}), описанной в первой главе, выполнена на уровне SQL-запроса (листинг \ref{lst:dynamic-bbox-sql}).
+Реализация механизма (\ref{eq:dynamic-bbox}), описанного в первой главе, выполнена на уровне SQL-запроса (листинг \ref{lst:dynamic-bbox-sql}).
 
 \begin{code}{dynamic-bbox-sql}{SQL}{Расчет динамического BBox (pgrouting\_engine.py)}
 SELECT ST_Expand(

@@ -50,9 +50,11 @@ y = R \cdot \ln\left(\tan\left(\frac{\pi}{4} + \frac{\phi}{2}\right)\right)
 \begin{pmatrix} X_{tile} \\ Y_{tile} \end{pmatrix} = \begin{pmatrix} S/W_z & 0 \\ 0 & -S/W_z \end{pmatrix} \begin{pmatrix} x_{merc} - x_{origin} \\ y_{merc} - y_{origin} \end{pmatrix},
 \end{equation}
 \where{
-    $S$ & разрешение тайла (Extent = 4096); \\
-    $W_z$ & ширина тайла в метрах на уровне зума $z$; \\
-    $x_{origin}$ & X-координата левого верхнего угла тайла в EPSG:3857.
+    $X_{tile}, Y_{tile}$ & координаты точки внутри тайловой системы координат (экранные координаты, обычно целые числа); \\
+    $S$ & разрешение тайла (Extent = 4096 единиц); \\
+    $W_z$ & ширина области, охватываемой тайлом на уровне масштаба $z$ (в метрах); \\
+    $x_{merc}, y_{merc}$ & координаты исходной точки в глобальной проекции Web Mercator (EPSG:3857); \\
+    $x_{origin}, y_{origin}$ & координаты левого верхнего угла тайла в проекции Web Mercator.
 }
 
 Данный подход обеспечивает баланс между точностью и скоростью: хранение в EPSG:3857 ускоряет выборку (индекс GiST работает по плоским координатам), а локальные координаты тайла снимают проблему дрожания (Jittering) на клиенте из-за ограничений Float32 в GPU.
@@ -73,7 +75,7 @@ y = R \cdot \ln\left(\tan\left(\frac{\pi}{4} + \frac{\phi}{2}\right)\right)
 
 \begin{figure}[H]
     \centering
-    \includemermaid[width=\linewidth, height=0.6\textheight, keepaspectratio]{03-qwebchannel-seq}
+    \includemermaid[width=\linewidth, height=0.85\textheight, keepaspectratio]{03-qwebchannel-seq}
     \caption{Схема взаимодействия через QWebChannel}
     \label{fig:qwebchannel-seq}
 \end{figure}
@@ -90,13 +92,13 @@ y = R \cdot \ln\left(\tan\left(\frac{\pi}{4} + \frac{\phi}{2}\right)\right)
 
 При отображении карты на мелком масштабе (например, весь город), попытка загрузить все дороги (включая дворовые проезды) приводит к перегрузке видеопамяти и визуальному шуму. Необходима динамическая фильтрация контента в зависимости от зума (Zoom Level).
 
-Для оптимизации рендеринга реализован реактивный цикл синхронизации.
+Для оптимизации рендеринга реализован следующий реактивный цикл синхронизации:
 \begin{enumerate}
-    \item Пользователь меняет масштаб карты колесом мыши.
-    \item JS вызывает метод ZoomBridge $\rightarrow$ Python.
-    \item Python отправляет новый уровень LOD (Level of Detail) в Data Processor через WebSocket.
-    \item Data Processor обновляет параметры SQL-фильтрации (например, \texttt{WHERE highway IN ('motorway', 'primary')}).
-    \item Карта перезагружает тайлы.
+    \item пользователь меняет масштаб карты колесом мыши;
+    \item модуль JS вызывает метод ZoomBridge $\rightarrow$ модуля Python;
+    \item модуль Python отправляет новый уровень LOD (Level of Detail) в сервис Data Processor через WebSocket;
+    \item сервис Data Processor обновляет параметры SQL-фильтрации (например, \texttt{WHERE highway IN ('motorway', 'primary')});
+    \item карта перезагружает тайлы.
 \end{enumerate}
 
 Полное время цикла синхронизации (Round Trip Time) описывается формулой:
@@ -160,6 +162,7 @@ T_{sync} \approx T_{ws\_latency} + T_{config\_parse} + T_{invalidate\_cache} \ap
     \centering
     \caption{Цветовое кодирование типов дорог и скоростной режим}
     \label{tab:road-attributes}
+    \small
     \begin{tabular}{|l|l|c|}
         \hline
         \textbf{Тип дороги (OSM tag)} & \textbf{Цвет (HEX)} & \textbf{Speed (км/ч)} \\ \hline

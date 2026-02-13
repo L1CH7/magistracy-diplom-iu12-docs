@@ -39,7 +39,7 @@ services:
 Для интеграции с FastAPI и Uvicorn реализован класс \texttt{InterceptHandler}, который перенаправляет стандартные записи логов в Loguru, сохраняя контекст вызова (имя файла, номер строки):
 
 \begin{code}{loguru-setup}{Python}{Настройка перехвата логов и ротации}
-# services/common/utils/loguru\_config.py
+# services/common/utils/loguru_config.py
 logger.add(
     sys.stdout,
     level=log_level,
