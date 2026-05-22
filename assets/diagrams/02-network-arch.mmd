@@ -1,0 +1,13 @@
+graph TD
+    subgraph C++ Core (TrafficEngine)
+        A[Core Simulator] -->|ZeroMQ PUB| B(Metrics Stream)
+        C[TdAltRouter] <-->|ZeroMQ REP| D(Route Oracle)
+    end
+    subgraph Python Gateway (FastAPI)
+        B -->|WebSocket| E[Web API Handler]
+        D <-->|ZMQ REQ| F[Router Client]
+    end
+    subgraph Web UI (PyQt5 Desktop)
+        E -->|JSON Stream| G[MapLibre GL Map]
+        H[User Event] -->|REST POST| F
+    end
