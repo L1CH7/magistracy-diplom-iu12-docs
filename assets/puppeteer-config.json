@@ -1,5 +1,7 @@
 {
+    "executablePath": "/usr/bin/google-chrome",
     "args": [
-        "--no-sandbox"
+        "--no-sandbox",
+        "--disable-setuid-sandbox"
     ]
 }
