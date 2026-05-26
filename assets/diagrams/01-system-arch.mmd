@@ -1,40 +1,52 @@
 flowchart TD
     %% --- Стили ---
-    classDef client fill:#f9f,stroke:#333;
-    classDef backend fill:#fff0b3,stroke:#f39c12;
-    classDef db fill:#d5e8f7,stroke:#005f9e;
+    classDef client fill:#f9f,stroke:#333,stroke-width:1px;
+    classDef backend fill:#fff0b3,stroke:#f39c12,stroke-width:1px;
+    classDef core fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px;
+    classDef db fill:#d5e8f7,stroke:#005f9e,stroke-width:1px;
     classDef ext fill:#e1f7d5,stroke:#27ae60,stroke-dasharray: 5 5;
 
     User((Пользователь))
 
     subgraph ClientHost ["Клиентская станция (Desktop)"]
-        UI["GUI Интерфейс<br/>(PyQt5)"]:::client
+        UI["GUI / Клиент<br/>(Web / Desktop)"]:::client
         MapLibre["Картографическое ядро<br/>(MapLibre GL JS)"]:::client
     end
 
-    subgraph Docker ["Серверный контур (Docker Compose)"]
+    subgraph Server ["Серверный контур (Docker / Linux)"]
         Gateway["API Gateway<br/>(Единая точка входа)"]:::backend
-        Router["Router Service<br/>(Поиск пути)"]:::backend
-        DP["Data Processor<br/>(Загрузчик тайлов)"]:::backend
         
-        DB["PostgreSQL<br/>(PostGIS + pgRouting)"]:::db
+        subgraph TrafficCore ["Traffic Core (C++ Daemon)"]
+            DP["Data Provider<br/>(Среда / Симулятор)"]:::core
+            MPR["Decision Engine<br/>(Модуль принятия решений)"]:::core
+            Router["Nav Core<br/>(Маршрутизатор TD-ALT)"]:::core
+            ZMQ["ZeroMQ Telemetry<br/>(Паб/Саб)"]:::core
+        end
+        
+        DB["PostgreSQL<br/>(PostGIS)"]:::db
+        Builder["Graph Builder<br/>(Офлайн генератор)"]:::backend
     end
 
     subgraph External ["Внешние источники"]
-        Overpass["Overpass API<br/>(OSM Data)"]:::ext
+        OSM["OpenStreetMap Data"]:::ext
     end
 
-    %% Связи
+    %% Связи пользователя и UI
     User --> UI
-    UI -->|"QWebChannel (IPC)"| MapLibre
-    
-    UI -->|"HTTP/WebSocket"| Gateway
+    UI -->|"IPC / HTTP"| MapLibre
+    UI -->|"WebSocket / HTTP"| Gateway
     MapLibre -->|"HTTP (Tiles)"| Gateway
 
-    Gateway -->|"Proxy"| Router
-    Gateway -->|"Proxy"| DP
-
-    Router -->|"SQL (asyncpg)"| DB
-    DP -->|"SQL (asyncpg)"| DB
+    %% Взаимодействие с бэкендом
+    Gateway -->|"Commands"| ZMQ
+    ZMQ -.->|"Heatmap / Telemetry"| Gateway
     
-    DP -.->|"Download JSON"| Overpass
+    %% Офлайн контур
+    OSM -->|"PBF / XML"| Builder
+    Builder -->|"SQL (PostGIS)"| DB
+    Builder -->|"mmap (CSR Dump)"| Router
+
+    %% Внутренний контур Traffic Core
+    DP <-->|События / Состояние| MPR
+    MPR <-->|Запросы пути| Router
+    DP -->|Push фактов| ZMQ
