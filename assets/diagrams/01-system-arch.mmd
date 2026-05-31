@@ -1,52 +1,32 @@
 flowchart TD
-    %% --- Стили ---
-    classDef client fill:#f9f,stroke:#333,stroke-width:1px;
-    classDef backend fill:#fff0b3,stroke:#f39c12,stroke-width:1px;
-    classDef core fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px;
-    classDef db fill:#d5e8f7,stroke:#005f9e,stroke-width:1px;
-    classDef ext fill:#e1f7d5,stroke:#27ae60,stroke-dasharray: 5 5;
+    %% Стили
+    classDef client fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
+    classDef container fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+    classDef db fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
 
     User((Пользователь))
-
-    subgraph ClientHost ["Клиентская станция (Desktop)"]
-        UI["GUI / Клиент<br/>(Web / Desktop)"]:::client
-        MapLibre["Картографическое ядро<br/>(MapLibre GL JS)"]:::client
-    end
-
-    subgraph Server ["Серверный контур (Docker / Linux)"]
-        Gateway["API Gateway<br/>(Единая точка входа)"]:::backend
-        
-        subgraph TrafficCore ["Traffic Core (C++ Daemon)"]
-            DP["Data Provider<br/>(Среда / Симулятор)"]:::core
-            MPR["Decision Engine<br/>(Модуль принятия решений)"]:::core
-            Router["Nav Core<br/>(Маршрутизатор TD-ALT)"]:::core
-            ZMQ["ZeroMQ Telemetry<br/>(Паб/Саб)"]:::core
-        end
-        
-        DB["PostgreSQL<br/>(PostGIS)"]:::db
-        Builder["Graph Builder<br/>(Офлайн генератор)"]:::backend
-    end
-
-    subgraph External ["Внешние источники"]
-        OSM["OpenStreetMap Data"]:::ext
-    end
-
-    %% Связи пользователя и UI
-    User --> UI
-    UI -->|"IPC / HTTP"| MapLibre
-    UI -->|"WebSocket / HTTP"| Gateway
-    MapLibre -->|"HTTP (Tiles)"| Gateway
-
-    %% Взаимодействие с бэкендом
-    Gateway -->|"Commands"| ZMQ
-    ZMQ -.->|"Heatmap / Telemetry"| Gateway
     
-    %% Офлайн контур
-    OSM -->|"PBF / XML"| Builder
-    Builder -->|"SQL (PostGIS)"| DB
-    Builder -->|"mmap (CSR Dump)"| Router
+    Client["Клиентское приложение<br/>(Qt Web / UI + MapLibre)"]:::client
+    
+    subgraph Docker["Серверный контур (Docker)"]
+        direction TB
+        Gateway["API Gateway / WS Proxy<br/>(Точка входа)"]:::container
+        Core["Traffic Core<br/>(C++ Симулятор)"]:::container
+        DataProc["Data Processor<br/>(Генератор тайлов)"]:::container
+        DB[("PostgreSQL + PostGIS<br/>(БД геоданных)")]:::db
+    end
 
-    %% Внутренний контур Traffic Core
-    DP <-->|События / Состояние| MPR
-    MPR <-->|Запросы пути| Router
-    DP -->|Push фактов| ZMQ
+    User <-->|Взаимодействие| Client
+    
+    %% Взаимодействие с клиентом
+    Client <-->|WebSocket: Команды управления, JSON Телеметрия| Gateway
+    Client <-->|HTTP: Векторные MVT тайлы карты| Gateway
+    
+    %% Внутренний роутинг в Docker
+    Gateway <-->|"ZMQ (PUB/SUB & REQ-REP): Стрим метрик и API маршрутизации"| Core
+    Gateway <-->|"HTTP API: Запрос тайлов"| DataProc
+    
+    %% Работа с базой
+    DataProc <-->|"SQL (PostGIS MVT queries)"| DB
+    DB -. "Офлайн-экспорт графа (Graph Builder)" .-> Core
+    
