@@ -330,3 +330,88 @@
   annote    = {Высокопроизводительная безблокировочная многопоточная очередь с несколькими производителями и несколькими потребителями (MPMC) на языке C++. Библиотека использует передовые методы lock-free программирования, включая атомарные операции и барьеры памяти, обеспечивая превосходное масштабирование и QPS по сравнению с блокирующими решениями на базе мьютексов. Применена в разработанном ядре симуляции для асинхронного буфера обмена задачами маршрутизации.}
 }
 
+@article{feld2019hybrid,
+  author    = {Sebastian Feld and Christoph Roch and Thomas Gabor and Christian Seidel and Florian Neukart and Isabella Galter and Wolfgang Mauerer and Claudia Linnhoff-Popien},
+  title     = {A Hybrid Solution Method for the Capacitated Vehicle Routing Problem Using a Quantum Annealer},
+  journal   = {Frontiers in ICT},
+  volume    = {6},
+  pages     = {13},
+  year      = {2019},
+  doi       = {10.3389/fict.2019.00013},
+  annote    = {В статье предложен гибридный классическо-квантовый метод решения задачи маршрутизации транспорта с ограничениями по грузоподъемности (CVRP). Авторы описывают математическую модель отображения CVRP на задачу квадратичной невырожденной бинарной оптимизации (QUBO) и оценивают возможность декомпозиции исходной задачи на подзадачи для последовательного решения на квантовом симуляторе D-Wave, сопоставляя полученные результаты по времени вычислений и качеству решений с классическими эвристиками.}
+}
+
+@article{buluc2017design,
+  author    = {Ayd{\i}n Bulu\c{c} and Tim Mattson and Scott McMillan and Jos\'{e} Moreira and Carl Yang},
+  title     = {Design of the GraphBLAS API for C},
+  journal   = {arXiv preprint arXiv:1705.04001},
+  year      = {2017},
+  annote    = {Работа посвящена разработке и стандартизации интерфейса программирования GraphBLAS для языка C, предоставляющего базовые блоки линейной алгебры для эффективной обработки графовых структур. Описываются ключевые концепции, математические соглашения, полукольца и основные объекты API, а также приводится пример реализации алгоритма центральности по посредничеству (betweenness centrality) на основе данных абстракций.}
+}
+
+@article{huang2007large,
+  author    = {Minyi Huang and Peter E. Caines and Roland P. Malham\'{e}},
+  title     = {Large-Population Cost-Coupled LQG Problems With Nonuniform Agents: Individual-Mass Behavior and Decentralized $\varepsilon$-Nash Equilibria},
+  journal   = {IEEE Transactions on Automatic Control},
+  volume    = {52},
+  number    = {9},
+  pages     = {1560--1571},
+  year      = {2007},
+  annote    = {В статье рассматриваются линейно-квадратичные гауссовские (LQG) игры в системах с большой численностью неоднородных агентов, связанных через индивидуальные функции стоимости. Авторы разрабатывают метод агрегирования состояний для получения децентрализованных законов управления и доказывают свойство устойчивости коллективного поведения, а также анализируют влияние неточных статистических характеристик популяции на отдельных агентов.}
+}
+
+@article{luo2024stg4traffic,
+  author    = {Xunlian Luo and Chunjiang Zhu and Detian Zhang and Qing Li},
+  title     = {STG4Traffic: A Survey and Benchmark of Spatial-Temporal Graph Neural Networks for Traffic Prediction},
+  journal   = {arXiv preprint arXiv:2307.00495},
+  year      = {2024},
+  annote    = {Представлен систематический обзор и бенчмарк пространственно-временных графовых нейронных сетей (STGNN), применяемых для прогнозирования параметров дорожного движения. Авторы анализируют сильные и слабые стороны современных моделей машинного обучения, объединяющих рекуррентные и графовые сверточные сети, и предлагают единую программную среду STG4Traffic на базе PyTorch для стандартизированного сравнения эффективности алгоритмов на различных наборах данных.}
+}
+
+@article{garg2020generalization,
+  author    = {Vikas K. Garg and Stefanie Jegelka and Tommi Jaakkola},
+  title     = {Generalization and Representational Limits of Graph Neural Networks},
+  journal   = {arXiv preprint arXiv:2002.06157},
+  year      = {2020},
+  annote    = {В работе исследуются теоретические ограничения выразительной способности графовых нейронных сетей (GNN). Авторы доказывают невозможность вычисления некоторых фундаментальных глобальных топологических свойств графов с помощью моделей, опирающихся исключительно на локальное агрегирование сообщений. Также в статье представлены первые оценки обобщающей способности GNN, учитывающие инвариантность к перестановкам вершин.}
+}
+
+@inproceedings{okumura2019pibt,
+  author    = {Keisuke Okumura and Manao Machida and Xavier D{\'e}fago and Yasumasa Tamura},
+  title     = {Priority Inheritance with Backtracking for Iterative Multi-Agent Path Finding},
+  booktitle = {Proceedings of the Twenty-Eighth International Joint Conference on Artificial Intelligence (IJCAI-19)},
+  year      = {2019},
+  note      = {Подтверждает ограничения PIBT на реальных графах (проблема синхронности) и экспоненциальную сложность.}
+}
+
+@article{richards1956shock,
+  author    = {P. Richards},
+  title     = {Shock waves on the highway},
+  journal   = {Operations Research},
+  volume    = {4},
+  number    = {1},
+  pages     = {42--51},
+  year      = {1956},
+  note      = {Классическая статья по ударным волнам в транспортных потоках (LWR-модель).}
+}
+
+@article{hernandez2017survey,
+  author    = {Pablo Hernandez-Leal and Michael Kaisers and Tim Baarslag and Enrique Munoz de Cote},
+  title     = {A Survey of Learning in Multiagent Environments: Dealing with Non-Stationarity},
+  journal   = {arXiv preprint arXiv:1707.09183},
+  year      = {2017},
+  note      = {Обосновывает проблему нестационарности, шум одновременного обновления агентов и неразрешимость (intractability) MARL на больших популяциях.}
+}
+
+@article{deepa2016swarm,
+  author    = {O. Deepa and A. Senthilkumar},
+  title     = {Swarm Intelligence from Natural to Artificial Systems: Ant Colony Optimization},
+  journal   = {International Journal on Applications of Graph Theory in Wireless Ad hoc Networks and Sensor Networks (GRAPH-HOC)},
+  volume    = {8},
+  number    = {1},
+  pages     = {9--17},
+  month     = {March},
+  year      = {2016},
+  doi       = {10.5121/jgraphoc.2016.8102},
+  note      = {Обосновывает вероятностную (случайную) природу роевого поиска маршрутов (блуждание), что делает его неприменимым для детерминированной маршрутизации транспортных средств.}
+}
