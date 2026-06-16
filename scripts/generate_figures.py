@@ -42,9 +42,9 @@ def generate_plots(csv_file, output_dir):
     plt.figure()
     # Отрисовываем черные зоны на самом нижнем слое (zorder=1), затем красные, затем желтые
     plt.plot(time, df['BlackZones'], color='#111111', linewidth=2.0, 
-             label=r'Критические заторы: $N \geq 2 C_{jam}$', zorder=1)
+             label=r'Критические заторы: $N \geq 1.5 C_{jam}$', zorder=1)
     plt.plot(time, df['RedZones'], color='#d62728', linewidth=1.5, 
-             label=r'Перегрузка: $C_{jam} \leq N < 2 C_{jam}$', zorder=2)
+             label=r'Перегрузка: $C_{jam} \leq N < 1.5 C_{jam}$', zorder=2)
     plt.plot(time, df['YellowZones'], color='#bcbd22', linewidth=1.5, 
              label=r'Плотный трафик: $C_{vis} + 0.3(C_{jam} - C_{vis}) \leq N < C_{jam}$', zorder=3)
     
