@@ -9,10 +9,16 @@
   annote    = {Учебное пособие, охватывающее базовые аспекты высокопроизводительных вычислений (HPC). Подробно рассматриваются закон Амдала, закон Густавсона-Барсиса, архитектуры параллельных вычислений и многопоточность. Приводятся практические примеры на языке Python с использованием библиотек Numba, Dask, Ipyparallel и MPI, а также обсуждаются концепции динамической компиляции, профилирования и распределенной обработки данных.}
 }
 
-@article{strzodka_aos_soa,
-  author    = {Robert Strzodka},
-  title     = {Abstraction for AoS and SoA Layout in C++},
-  journal   = {Application Specific Computing},
+@incollection{strzodka_aos_soa,
+  author    = {Strzodka, Robert},
+  title     = {Abstraction for AoS and SoA layout in C++},
+  booktitle = {GPU computing gems Jade edition},
+  publisher = {Morgan Kaufmann},
+  year      = {2012},
+  month     = {December},
+  pages     = {429--441},
+  isbn      = {9780123859631},
+  doi       = {10.1016/B978-0-12-385963-1.00031-9},
   annote    = {В статье исследуется влияние организации данных в памяти на производительность (особенно для GPU). Автор предлагает библиотеку абстракций (ASX) на C++, которая позволяет использовать привычный синтаксис «массив структур» (AoS), при этом физически размещая данные в формате «структура массивов» (SoA) или гибридном ASA. Это позволяет менять схему памяти одним шаблонным параметром, достигая оптимальной производительности без кардинального переписывания кода.}
 }
 
@@ -25,10 +31,17 @@
 }
 
 @article{seaports_mean_field,
-  author    = {Charles-Albert Lehalle and Giulia Livieri},
-  title     = {Competition among seaports through Mean Field Games and real-world data},
-  journal   = {arXiv},
-  annote    = {Работа применяет теорию «игр среднего поля» (Mean Field Games, MFG) для моделирования конкуренции между морскими портами и маршрутизации транспортных потоков. Вводится понятие централизованного координатора, который минимизирует целевую функцию, учитывающую транспортные издержки, коммерческую маржу и штрафы за перегруженность портов назначения. Эффективность модели проверяется на реальном наборе данных ShipFix о мировых перевозках угля.}
+  author        = {Charles-Albert Lehalle and Giulia Livieri},
+  title         = {Competition among seaports through Mean Field Games and real-world data},
+  journal       = {arXiv preprint arXiv:2512.01438},
+  year          = {2025},
+  month         = {December},
+  eprint        = {2512.01438},
+  archiveprefix = {arXiv},
+  primaryclass  = {math.OC},
+  doi           = {10.48550/arXiv.2512.01438},
+  url           = {https://doi.org/10.48550/arXiv.2512.01438},
+  annote        = {Работа применяет теорию «игр среднего поля» (Mean Field Games, MFG) для моделирования конкуренции между морскими портами и маршрутизации транспортных потоков. Вводится понятие централизованного координатора, который минимизирует целевую функцию, учитывающую транспортные издержки, коммерческую маржу и штрафы за перегруженность портов назначения. Эффективность модели проверяется на реальном наборе данных ShipFix о мировых перевозках угля.}
 }
 
 @techreport{rehfeldt2022trillion,
@@ -85,10 +98,18 @@
   annote    = {Исследование методов встраивания (inlining) вложенных массивов при использовании архитектуры данных «Структура массивов» (SoA). Предлагается расширение C++/CUDA DSL (Ikra-Cpp), позволяющее писать объектно-ориентированный код с внутренними массивами, транслируя его в эффективный SoA-формат. Анализируются подходы с полным, частичным и нулевым встраиванием на примере симуляции дорожного движения.}
 }
 
-@manual{utdallas_combinatorial,
-  title     = {Introduction to Combinatorial Optimization},
-  organization = {The University of Texas at Dallas},
-  annote    = {Учебные материалы курса по комбинаторной оптимизации. Рассматриваются классические алгоритмы на графах (кратчайшие пути, минимальные остовные деревья), методы «разделяй и властвуй», динамическое программирование, базовые сведения по NP-трудным задачам и методы аппроксимации.}
+@inbook{utdallas_combinatorial,
+  author    = {Du, Ding-Zhu and Pardalos, Panos and Hu, Xiaodong and Wu, Weili},
+  title     = {Introduction},
+  booktitle = {Introduction to Combinatorial Optimization},
+  year      = {2022},
+  publisher = {Springer International Publishing},
+  address   = {Cham},
+  pages     = {1--11},
+  isbn      = {978-3-031-10596-8},
+  doi       = {10.1007/978-3-031-10596-8_1},
+  url       = {https://doi.org/10.1007/978-3-031-10596-8_1},
+  annote    = {Учебное пособие по комбинаторной оптимизации. Рассматриваются классические алгоритмы на графах (кратчайшие пути, минимальные остовные деревья), методы «разделяй и властвуй», динамическое программирование, базовые сведения по NP-трудным задачам и методы аппроксимации.}
 }
 
 @inproceedings{ribeiro2008memory,
@@ -106,6 +127,9 @@
   booktitle = {Artificial Intelligence},
   publisher = {Springer International Publishing},
   year      = {2019},
+  pages     = {96--115},
+  isbn      = {978-3-030-33273-0},
+  doi       = {10.1007/978-3-030-33274-7_6},
   annote    = {Обзорная работа, посвящённая проблеме многоагентного поиска пути (MAPF). Рассматриваются подходы к вычислению непересекающихся маршрутов для нескольких агентов. Приводятся классификации алгоритмов и примеры их практического применения в робототехнике, логистике автоматизированных складов и видеоиграх.}
 }
 
@@ -130,14 +154,22 @@
 
 
 @techreport{cpp_p2055r1,
-  title     = {P2055R1: A Relaxed Guide to memory\_order\_relaxed},
-  institution = {Open-std.org},
-  annote    = {Документ комитета стандартизации C++, подробно разбирающий использование наиболее слабой модели синхронизации~-- memory\_order\_relaxed. Разъясняется риск появления значений "из воздуха" (out-of-thin-air) при циклических зависимостях вычислений и даются рекомендации по безопасному использованию relaxed-операций.}
+  author      = {Hans Boehm and David Goldblatt and Paul E. McKenney},
+  title       = {P2055R1: A Relaxed Guide to memory\_order\_relaxed},
+  institution = {ISO/IEC JTC1/SC22/WG21},
+  year        = {2024},
+  month       = {April},
+  note        = {WG21 Paper},
+  annote      = {Документ комитета стандартизации C++, подробно разбирающий использование наиболее слабой модели синхронизации~-- memory\_order\_relaxed. Разъясняется риск появления значений "из воздуха" (out-of-thin-air) при циклических зависимостях вычислений и даются рекомендации по безопасному использованию relaxed-операций.}
 }
 
-@techreport{outerloop_heap,
-  author    = {{Outer Loop Consulting}},
-  title     = {Performance effects of heap structure choice for Path Finding},
+@inproceedings{outerloop_heap,
+  author    = {Jake Moss and Christopher O’Brien and Jamie Cook and Pedro Camargo},
+  title     = {Performance effects of heap structure choice for path finding: A traffic modelling perspective},
+  booktitle = {Proceedings of the Australasian Transport Research Forum (ATRF)},
+  year      = {2023},
+  address   = {Perth, Australia},
+  url       = {http://www.atrf.info},
   annote    = {Практическое исследование влияния выбора структуры кучи (heap) на производительность алгоритмов поиска пути (таких как A* или Дейкстра). Демонстрируется, что на разреженных графах дорожных сетей асимптотические преимущества фибоначчиевой кучи нивелируются её плохой локальностью кэша, в отличие от простых массивов или бинарных куч.}
 }
 
@@ -150,10 +182,16 @@
   annote    = {Масштабное вычислительное исследование производительности алгоритмов поиска кратчайшего пути. Сравниваются реализации алгоритмов Дейкстры, Беллмана-Форда, D'Esopo-Pape на различных типах графов. Работа содержит глубокий экспериментальный анализ и теоретические доказательства, объясняющие поведение алгоритмов на специфических топологиях сетей.}
 }
 
-@misc{biggar_sorting,
-  author    = {Paul Biggar},
-  title     = {Sorting in the Presence of Branch Prediction and Caches},
-  annote    = {Исследование влияния архитектурных особенностей процессоров (предсказателя ветвлений и кэш-памяти) на классические алгоритмы сортировки (heapsort, mergesort, quicksort, radixsort). Анализируется количество промахов предсказателя и кэша, предлагаются cache-conscious оптимизации для существенного ускорения базовых сортировок.}
+@techreport{biggar_sorting,
+  author      = {Paul Biggar and David Gregg},
+  title       = {Sorting in the Presence of Branch Prediction and Caches},
+  institution = {Department of Computer Science, University of Dublin, Trinity College},
+  number      = {TCD-CS-2005-57},
+  address     = {Dublin, Ireland},
+  year        = {2005},
+  month       = {August},
+  note        = {Revision 1: January 2007},
+  annote      = {Исследование влияния архитектурных особенностей процессоров (предсказателя ветвлений и кэш-памяти) на классические алгоритмы сортировки (heapsort, mergesort, quicksort, radixsort). Анализируется количество промахов предсказателя и кэша, предлагаются cache-conscious оптимизации для существенного ускорения базовых сортировок.}
 }
 
 @article{duret2017traffic,
@@ -176,10 +214,14 @@
 }
 
 @article{yuan2012realtime,
-  author    = {Yufei Yuan and Serge P. Hoogendoorn},
-  title     = {Real-time Lagrangian traffic state estimator for freeways},
+  author    = {Yuan, Yufei and Lint, J. W. C. and Wilson, R. and Kessels, Femke and Hoogendoorn, Serge},
+  title     = {Real-Time Lagrangian Traffic State Estimator for Freeways},
+  journal   = {IEEE Transactions on Intelligent Transportation Systems},
+  volume    = {13},
+  pages     = {59--70},
   year      = {2012},
-  month     = {January},
+  month     = {March},
+  doi       = {10.1109/TITS.2011.2178837},
   annote    = {Научная статья по созданию алгоритмов оценки состояний дорожного движения на автомагистралях в реальном времени. Используется лагранжев подход для отслеживания кинематических волн и предсказания развития транспортных заторов на основе комбинированных данных наблюдений.}
 }
 
@@ -239,23 +281,25 @@
   annote    = {Книга по программированию на языке ассемблера архитектуры x86/x64. Содержит глубокий разбор микроархитектуры современных процессоров, регистров и инструкций расширений SSE и AVX. Приведены примеры оптимизации высокоуровневого кода путем вызова ассемблерных функций и эффективной векторизации данных.}
 }
 
-@misc{containers_cmu,
-  title     = {Linux containers, Docker, namespaces},
-  organization = {Carnegie Mellon University},
-  annote    = {Учебные материалы, рассматривающие системные механизмы изоляции процессов в ОС Linux. Разбирается концепция контейнеризации приложений на основе пространств имен (namespaces) и контрольных групп (cgroups) на уровне ядра операционной системы.}
-}
-
-@article{arkatkar_antoniou_tum,
-  author    = {Shriniwas Arkatkar and Constantinos Antoniou},
-  title     = {Calibration of Link Performance Functions in heterogeneous traffic},
-  annote    = {Исследование методов калибровки функций загруженности звеньев (Link Performance Functions / Volume-Delay Functions) для условий гетерогенного трафика. Статья описывает, как корректная настройка параметров задержек повышает точность макроскопических моделей при распределении транспортного спроса.}
+@techreport{felter2014updated,
+  author      = {Wes Felter and Alexandre Ferreira and Ram Rajamony and Juan Rubio},
+  title       = {An Updated Performance Comparison of Virtual Machines and Linux Containers},
+  institution = {IBM Research Division, Austin Research Laboratory},
+  number      = {RC25482 (AUS1407-001)},
+  year        = {2014},
+  month       = {July},
+  url         = {https://course.ece.cmu.edu/~ece845/docs/containers.pdf},
+  annote      = {В данном техническом отчете (IBM Research Report), используемом в учебных курсах Carnegie Mellon University, проводится актуальное сравнение производительности традиционных виртуальных машин (на базе KVM) и контейнеров Linux (на базе Docker). В теоретической части документа подробно разбираются механизмы изоляции процессов в ОС Linux: пространства имен (namespaces), контрольные группы (cgroups) и многослойные файловые системы (AUFS). В практической части оцениваются накладные расходы на виртуализацию процессора, памяти, сети и подсистемы ввода-вывода с использованием микробенчмарков (PXZ, Linpack, Stream, RandomAccess) и реальных серверных приложений (Redis, MySQL). Главный вывод исследования: контейнеры (Docker) практически не создают накладных расходов на процессор и память, обеспечивая производительность на уровне нативного исполнения (bare metal) и превосходя KVM почти во всех сценариях. Однако авторы отмечают, что для систем с интенсивным вводом-выводом контейнерам требуется архитектурная оптимизация (например, использование томов Volume вместо AUFS и отключение NAT).}
 }
 
 @manual{fog_optimizing_cpp,
-  author    = {Agner Fog},
-  title     = {Optimizing software in C++: An optimization guide for Windows, Linux, and Mac platforms},
-  url       = {www.agner.org/optimize},
-  annote    = {Знаменитое руководство Агнера Фога по низкоуровневой оптимизации C++ кода. Охватывает широкий спектр техник: от выравнивания структур данных и управления кэшем до ручной векторизации с помощью интринсиков. Подробно разобраны опции современных компиляторов для генерации максимально быстрого ассемблерного кода.}
+  author       = {Agner Fog},
+  title        = {Optimizing software in C++: An optimization guide for Windows, Linux, and Mac platforms},
+  organization = {Technical University of Denmark},
+  year         = {2025},
+  url          = {https://www.agner.org/optimize/optimizing_cpp.pdf},
+  urldate      = {2026-06-17},
+  annote       = {Знаменитое руководство Агнера Фога по низкоуровневой оптимизации C++ кода. Охватывает широкий спектр техник: от выравнивания структур данных и управления кэшем до ручной векторизации с помощью интринсиков. Подробно разобраны опции современных компиляторов для генерации максимально быстрого ассемблерного кода.}
 }
 
 @techreport{goldberg2004alt,
@@ -279,11 +323,14 @@
   annote    = {Практическое руководство по разработке транспортных моделей в среде PTV Vision VISUM. Детально показаны процедуры редактирования графа сети, использование модуля ICA для моделирования задержек на перекрестках, генерация фрагментов сети и анализ результатов перераспределения потоков.}
 }
 
-@article{artemov2021modeling,
+@inproceedings{artemov2021modeling,
   author    = {А. Ю. Артемов and С. В. Дорохин},
   title     = {Моделирование транспортных потоков: аналитический обзор},
-  journal   = {Воронежский государственный лесотехнический университет имени Г.Ф. Морозова},
-  address   = {Воронеж, Россия},
+  booktitle = {Технология транспортных процессов - настоящее и будущее: Материалы Всероссийской научно-практической конференции (Воронеж, 15 марта 2021 года)},
+  editor    = {В. А. Зеликов},
+  publisher = {Воронежский государственный лесотехнический университет им. Г.Ф. Морозова},
+  address   = {Воронеж},
+  pages     = {20--26},
   year      = {2021},
   doi       = {10.34220/TPTPF2021_20-26},
   annote    = {Аналитический обзор методов транспортного моделирования. Приводится классификация систем на микроскопические (детальное поведение водителя), макроскопические (гидродинамические аналогии потоков) и мезоскопические. Рассматриваются их входные данные, ограничения и решаемые градостроительные задачи.}
@@ -381,7 +428,7 @@
   title     = {Priority Inheritance with Backtracking for Iterative Multi-Agent Path Finding},
   booktitle = {Proceedings of the Twenty-Eighth International Joint Conference on Artificial Intelligence (IJCAI-19)},
   year      = {2019},
-  note      = {Подтверждает ограничения PIBT на реальных графах (проблема синхронности) и экспоненциальную сложность.}
+  annote    = {Подтверждает ограничения PIBT на реальных графах (проблема синхронности) и экспоненциальную сложность.}
 }
 
 @article{richards1956shock,
@@ -392,7 +439,7 @@
   number    = {1},
   pages     = {42--51},
   year      = {1956},
-  note      = {Классическая статья по ударным волнам в транспортных потоках (LWR-модель).}
+  annote    = {Классическая статья по ударным волнам в транспортных потоках (LWR-модель).}
 }
 
 @article{hernandez2017survey,
@@ -400,7 +447,7 @@
   title     = {A Survey of Learning in Multiagent Environments: Dealing with Non-Stationarity},
   journal   = {arXiv preprint arXiv:1707.09183},
   year      = {2017},
-  note      = {Обосновывает проблему нестационарности, шум одновременного обновления агентов и неразрешимость (intractability) MARL на больших популяциях.}
+  annote    = {Обосновывает проблему нестационарности, шум одновременного обновления агентов и неразрешимость (intractability) MARL на больших популяциях.}
 }
 
 @article{deepa2016swarm,
@@ -413,7 +460,7 @@
   month     = {March},
   year      = {2016},
   doi       = {10.5121/jgraphoc.2016.8102},
-  note      = {Обосновывает вероятностную (случайную) природу роевого поиска маршрутов (блуждание), что делает его неприменимым для детерминированной маршрутизации транспортных средств.}
+  annote    = {Обосновывает вероятностную (случайную) природу роевого поиска маршрутов (блуждание), что делает его неприменимым для детерминированной маршрутизации транспортных средств.}
 }
 
 @book{sheffi1985urban,
