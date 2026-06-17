@@ -5,6 +5,7 @@
 
 local section_num = 1
 local eq_num = 0
+local equation_numbers = {}
 
 -- @brief Преобразование списка инлайнов в строку.
 -- @param inlines Список инлайнов.
@@ -295,6 +296,12 @@ function Pandoc(doc)
         eq_num = eq_num + 1
         local eq_label = string.format("(%d.%d)", section_num, eq_num)
         
+        local label = math_block.text:match("\\label%s*{(.-)}")
+        if label then
+          equation_numbers[label] = string.format("%d.%d", section_num, eq_num)
+          math_block.text = math_block.text:gsub("\\label%s*{.-}", "")
+        end
+        
         -- Разделяем остальное содержимое абзаца
         local before = {}
         local after = {}
@@ -419,3 +426,16 @@ function Pandoc(doc)
   doc.blocks = final_blocks
   return doc
 end
+
+local function LinkFilter(link)
+  local ref = link.attributes["reference"]
+  if ref and equation_numbers[ref] then
+    link.content = { pandoc.Str(equation_numbers[ref]) }
+    return link
+  end
+end
+
+return {
+  { Pandoc = Pandoc },
+  { Link = LinkFilter }
+}
