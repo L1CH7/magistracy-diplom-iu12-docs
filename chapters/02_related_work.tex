@@ -21,9 +21,11 @@ We evaluate three core shortest path routing paradigms that shape the search spa
 Priority queue selection dictates the step latency constant $t_{\text{iter}}$. 
 Cherkassky et al. \cite{cherkassky1994shortest} evaluate priority queues on sparse networks. 
 Their experiments show that Fibonacci heaps suffer from high constant factors and poor cache locality. 
-Simple binary heaps outperform Fibonacci heaps on real-world graphs. 
+Simple binary heaps outperform Fibonacci heaps on real-world graphs but remain bottlenecked by branch mispredictions in their element comparison loops \cite{biggar_sorting}. 
+To alleviate memory latency and branching penalties, multi-ary heaps (such as 4-ary and 8-ary heaps) restrict tree depth and improve cache-line utilization, making them highly effective for shortest path routing on road graphs \cite{outerloop_heap}. 
 Ahuja et al. \cite{ahuja1990faster} introduce radix heaps to exploit integer edge weights, bounds, and monotonicity. 
 Radix heaps achieve near-constant time complexities by grouping keys into dynamic buckets. 
+Similarly, the concept of relaxed sorting is utilized in parallel algorithms such as Delta-stepping \cite{meyer2003delta}, where grouping nodes into buckets of width $\Delta$ avoids strict ordering overhead. 
 
 Breitling et al. \cite{quickheap_arxiv} propose QuickHeap to minimize element comparison counts through lazy sorting, which also incorporates SIMD vectorization for pivot selection. 
 While QuickHeap achieves strong theoretical bounds, the authors acknowledge that cache misses during graph traversal on road networks diminish SIMD acceleration benefits. 

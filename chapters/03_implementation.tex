@@ -20,7 +20,7 @@ This compression reduces dynamic weight calculation cost to three CPU cycles.
 
 We implement a cache-conscious SIMD 8-ary priority heap to reduce tree traversal depth. 
 The 8-ary structure matches the width of the AVX2 vector register: eight 32-bit child keys occupy exactly 256 bits, saturating one SIMD load instruction with no wasted lanes. 
-We vectorize the child node search step using AVX2 intrinsics. 
+We vectorize the child node search step using AVX2 intrinsics, aligning with hardware-level optimization guidelines for SIMD registers, data packing, and alignment on x86 architectures \cite{kusswurm2014modern}. 
 The child search routine uses the \verb|_mm256_min_epu32| instruction to locate the minimum among all eight child keys within a single 256-bit register, representing an instruction-level parallel operation executing on one CPU core. 
 This instruction eliminates scalar branch instructions during the down-heap traversal and reduces the hot-loop critical path. 
 
