@@ -8,6 +8,8 @@
 \usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{microtype}
+\usepackage{url}
+
 
 \begin{document}
 
@@ -27,15 +29,15 @@
 \maketitle
 
 \begin{abstract}
-We evaluate seventy-two priority queue and routing algorithm combinations on a scale-free graph of the Moscow road network containing 1.2 million nodes. 
+We evaluate seventy-seven priority queue and algorithm configuration variants on a scale-free graph of the Moscow metropolitan subgraph containing 582 thousand nodes and 1.46 million directed edges. 
 Our study reveals microarchitectural isomorphism, where priority queue memory layout scales step execution latency but leaves macro-topological search space complexity exponents unchanged. 
-We construct a three-step filtering pipeline to identify optimal routing configurations based on complexity exponents, node re-opening metrics, and hardware jitter stability. 
+We construct a three-step filtering pipeline to identify optimal routing configurations based on complexity exponents, node re-opening metrics, and tail latency stability. 
 Our benchmarks demonstrate that SimdRadixHeap is the optimal priority queue backend for monotone ALT queries, delivering 3147 QPS for localized queries and 631 QPS for megalopolis journeys. 
 For non-monotone queries, we recommend our vectorized cache-conscious Simd8AryHeap.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Shortest path routing, priority queues, SIMD, ALT, microarchitectural isomorphism, hardware jitter.
+Shortest path routing, priority queues, SIMD, ALT, microarchitectural isomorphism, SIMD vectorization, real-time routing.
 \end{IEEEkeywords}
 
 \input{chapters/01_introduction}

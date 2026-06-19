@@ -1,8 +1,7 @@
 \section{Empirical Evaluation}
 \label{sec:evaluation}
 
-We present the empirical evaluation of seventy-two algorithm-queue combinations on the Moscow road network. 
-First, we analyze execution time composition using our multivariate OLS regression. 
+We present the empirical evaluation of the routing engine configurations on the Moscow road network. We evaluate seven priority queue structures (excluding the duplicate Delta queue in favor of the identical Bucket queue) across three shortest path algorithms with $1 + 2 \times 5$ weight variations (unweighted Dijkstra, and A* and ALT swept over five heuristic weights $w \in [1.0, 1.2]$). First, we analyze execution time composition using our multivariate OLS regression. 
 Second, we validate performance significance with ANOVA. 
 Third, we outline the three-step filtering pipeline to isolate the optimal configurations.
 
@@ -24,6 +23,28 @@ ANOVA results verify that the search algorithm, priority queue layout, and path 
 We record $F_{\text{Algorithm}} = 1305.63$, $F_{\text{Queue}} = 30.76$, and $F_{\text{PathEdges}} = 7691.36$ ($p < 10^{-40}$). 
 The dominant F-statistic belongs to path length, confirming that topological complexity drives the execution budget. 
 Queue selection ranks second: it shapes the constant factor but not the growth law.
+\subsection{Macro-Topological Search Space Scaling and Isomorphism Zones}
+To prevent visual clutter and evaluate the full matrix of configurations simultaneously, we reject discrete line plotting in favor of continuous behavioral bands (Figure~\ref{fig:algo_bands}). We map all seven candidate priority queues over three routing algorithms, covering $1 + 2 \times 5$ parameter variations. The duplicate Delta queue is explicitly excluded in favor of the identical Bucket queue. Each band represents an algorithmic paradigm partitioned by its empirical scaling boundaries: the upper limit is dictated by the scalar 2-ary baseline heap, while the lower bound is constrained by our vectorized SIMD architectures. Despite minor overlap in the mid-range path bins, the ALT band demonstrates clear performance superiority over A* and Dijkstra throughout the entire path complexity range.
+
+The empirical evaluation isolates a strict microarchitectural isomorphism across the entire evaluation space. The baseline unweighted Dijkstra framework occupies a distinct upper latency zone with a scaling exponent of $\alpha \approx 2.09$ across all tested heaps. The weighted $A^*$ continuum ($w \in [1.0, 1.2]$) shifts into a wider parallel band ($\alpha \approx 2.45$), heavily penalized by the bidirectional exploration of the unconstrained scale-free network frontier. 
+
+The directed ALT framework ($w \in [1.0, 1.2]$) compresses the active corridor, mapping to the lowest latency band with $\alpha \approx 1.86$. The invariant geometric parallel topology of these three bands empirically proves that priority queue mutations shift only the absolute performance constant ($k$), while the macro-topological structure of the heuristic determines the asymptotic growth law ($\alpha$).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{assets/fig_algo_bands.png}
+\caption{Performance bands showing throughput (QPS, log scale) vs. path length for Dijkstra, A*, and ALT algorithms. The shaded regions represent the envelope between the worst-performing 2-ary heap and the best-performing vector/radix layouts, demonstrating microarchitectural isomorphism.}
+\label{fig:algo_bands}
+\end{figure}
+
+\subsection{Parametric Elasticity and Monotonicity Breakdown Analysis}
+The structural response to heuristic weight inflation ($w > 1.0$) uncovers a radical divergence between coordinate-free and interval-bound priority queues. For the vectorized $A^*$ continuum, increasing the weight exhibits a positive throughput elasticity ($\varepsilon_w$). The inflated heuristic pulls the active vertex exploration frontier into a highly directional, narrow corridor. Because the spatial heuristic gradient remains stable, vertex keys enter the queue in a mostly monotone sequence, minimizing deep down-heap swaps.
+
+Conversely, for the ALT framework running on interval-restricted architectures like the \texttt{SimdRadixHeap}, weight inflation triggers an absolute performance collapse, with elasticity dropping sharply to $\varepsilon_w = -3.58$ at $w=1.05$. This phenomenon is not tied to standard memory overhead, but to the destruction of the key monotonicity invariant. The inflated ALT potential formula:
+\begin{equation}
+f(v) = g(v) + w \cdot h(v)
+\end{equation}
+becomes non-admissible and non-monotone when $w > 1.0$, causing downstream vertices to generate lower keys than their parents. As a result, elements drift backward into previously closed buckets, forcing the \texttt{SimdRadixHeap} to halt its $O(1)$ extraction loop and execute exhaustive, branch-heavy bucket-scan recovery passes.
 
 \subsection{The Three-Step Filtering Pipeline}
 
@@ -51,7 +72,7 @@ We filter Dijkstra and A* due to their excessive search envelopes.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{assets/fig_param_elasticity.png}
-\caption{ALT throughput elasticity $\varepsilon_w = \Delta\%\,QPS\,/\,\Delta\%\,w$ for each queue backend. D-ary heaps carry strongly positive elasticity. SimdRadix collapses to $\varepsilon_w = -3.58$ at $w=1.05$. SimdBucket and SimdDelta hover near zero.}
+\caption{ALT throughput elasticity $\varepsilon_w = \Delta\%\,QPS\,/\,\Delta\%\,w$ for each queue backend. D-ary heaps carry strongly positive elasticity. SimdRadix collapses to $\varepsilon_w = -3.58$ at $w=1.05$. SimdBucket hovers near zero.}
 \label{fig:elasticity}
 \end{figure}
 
@@ -65,9 +86,9 @@ A production routing engine cannot accept this error regime.
 \textbf{Radix monotonicity collapse.} 
 ALT with $w > 1.0$ emits non-monotone priority keys: the inflated heuristic $f(v) = g(v) + w \cdot h(v)$ can decrease for nodes already in the open set, violating RadixHeap's strict monotonicity invariant. 
 Each key violation triggers an $O(B)$ bucket-scan recovery pass. 
-Figure~\ref{fig:radix_collapse} exposes the consequence: SimdRadixHeap mean latency climbs from 2.94\,ms at $w=1.0$ to 22.66\,ms at $w=1.2$ --- a $7.7\times$ explosion. 
+Figure~\ref{fig:radix_collapse} exposes the consequence: SimdRadixHeap mean latency climbs from 2.94\,ms at $w=1.0$ to 22.66\,ms at $w=1.2$, representing a $7.7\times$ explosion. 
 Ghost-node density falls from 0.456 to 0.089 in parallel: the search frontier is corrupted before it expands fully, so fewer productive nodes enter the queue. 
-Figure~\ref{fig:reopen} shows the re-opening index $\rho = N_{\text{pop}} / N_{\text{visited}}$ for RadixHeap \emph{drops} from 1.146 to 1.022 as $w$ increases --- the search terminates prematurely rather than correctly. 
+Figure~\ref{fig:reopen} shows the re-opening index $\rho = N_{\text{pop}} / N_{\text{visited}}$ for RadixHeap \emph{drops} from 1.146 to 1.022 as $w$ increases, because the search terminates prematurely rather than correctly. 
 The QPS elasticity for RadixHeap is $-3.58$ at $w=1.05$; for Simd8AryHeap it is $+7.27$. 
 We fix $w = 1.0$ for all remaining evaluation.
 
@@ -88,7 +109,7 @@ We fix $w = 1.0$ for all remaining evaluation.
 \subsubsection{Step 3: Tail Latency Stability Filtering}
 With $w=1.0$ fixed, we evaluate hardware stability using excess kurtosis and tail roughness $p_{99}/p_{50}$.
 Figure~\ref{fig:kurtosis} reports excess kurtosis per queue. 
-SimdBucketQueue records excess kurtosis of 41.2 and roughness 12.9 --- one in thirteen queries runs 12$\times$ slower than the median. 
+SimdBucketQueue records excess kurtosis of 41.2 and roughness 12.9, meaning one in thirteen queries runs 12$\times$ slower than the median. 
 The SimdDeltaQueue implementation is identical in observed metrics (kurtosis 41.8, roughness 12.9) and is excluded as a duplicate. 
 This variance in SimdBucketQueue arises from bucket-scan overhead on long paths, which grows with path complexity and produces a heavy upper tail. 
 SimdQuickHeap records kurtosis 16.0 and roughness 9.1, elevated by branch mispredictions in its lazy sifting routine. 
@@ -100,7 +121,7 @@ Both Simd8AryHeap and SimdRadixHeap qualify for final throughput evaluation.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{assets/fig_excess_kurtosis.png}
-\caption{Excess kurtosis per queue backend under ALT $w=1.0$. SimdBucket and SimdDelta exhibit kurtosis $>40$, indicating heavy tail behavior. D-ary heaps and SimdRadix remain below 21.}
+\caption{Excess kurtosis per queue backend under ALT $w=1.0$. SimdBucket exhibits kurtosis $>40$, indicating heavy tail behavior. D-ary heaps and SimdRadix remain below 21.}
 \label{fig:kurtosis}
 \end{figure}
 

@@ -127,6 +127,40 @@ ALPHA = {
 _nan = float('nan')
 BINS_LABELS  = ['0-30','30-60','60-100','100-150','150-200','200-300','300-450','450-600']
 BINS_MIDPTS  = [15, 45, 80, 125, 175, 250, 375, 525]
+
+DIJKSTRA_QPS = {
+    '16-ary':    [1691.43, 392.35, 85.16, 30.43, 15.60, 10.53, 8.64],
+    '2-ary':     [1607.45, 388.30, 83.13, 29.54, 14.90,  9.97, 8.15],
+    '4-ary':     [1759.18, 419.66, 91.49, 32.84, 16.84, 11.27, 9.18],
+    '8-ary':     [1797.12, 418.58, 91.99, 32.73, 16.64, 11.19, 9.10],
+    'bucket':    [1880.44, 482.67, 108.96, 40.50, 21.19, 14.12, 12.21],
+    'delta':     [1901.48, 483.07, 108.20, 39.98, 21.17, 14.01, 12.23],
+    'quickheap': [1578.88, 388.77, 86.36, 31.48, 16.07, 10.87, 8.70],
+    'radix':     [1742.19, 405.42, 92.04, 33.98, 17.63, 11.98, 9.87]
+}
+
+ASTAR_QPS = {
+    '16-ary':    [2766.82, 554.04, 135.68, 51.02, 22.20, 11.25, 7.67],
+    '2-ary':     [2579.11, 527.12, 129.99, 48.66, 21.03, 10.61, 7.25],
+    '4-ary':     [2752.50, 537.39, 135.74, 50.11, 21.88, 11.03, 7.58],
+    '8-ary':     [2761.64, 568.78, 139.40, 52.33, 22.61, 11.46, 8.16],
+    'bucket':    [3219.24, 649.08, 168.32, 65.14, 28.31, 14.71, 10.41],
+    'delta':     [3255.77, 645.11, 164.27, 64.37, 27.95, 14.48, 10.01],
+    'quickheap': [2644.46, 538.90, 137.29, 52.63, 23.21, 11.81, 8.52],
+    'radix':     [2891.87, 578.80, 146.05, 56.05, 24.57, 12.45, 8.76]
+}
+
+ALT_QPS = {
+    '16-ary':    [23238.28, 3307.26, 1842.77, 885.21, 523.07, 333.47, 209.97],
+    '2-ary':     [26944.94, 3184.01, 1729.45, 856.28, 507.09, 323.15, 199.56],
+    '4-ary':     [25290.66, 3237.76, 1778.54, 877.84, 519.00, 329.19, 201.39],
+    '8-ary':     [27572.86, 3240.77, 1764.72, 886.84, 531.14, 328.12, 228.13],
+    'bucket':    [25396.82, 4003.60, 2180.29, 1123.04, 678.69, 441.95, 273.25],
+    'delta':     [26038.86, 4009.70, 2137.01, 1121.93, 670.46, 439.14, 275.40],
+    'quickheap': [25530.53, 3805.79, 2022.27, 995.95, 627.62, 392.29, 251.30],
+    'radix':     [32522.98, 4284.48, 2333.31, 1218.19, 738.52, 502.04, 270.91]
+}
+
 ALT_W10_QPS_BY_BIN = {
     '8-ary':     [22583, 27572, 3240, 1764,  886, 531, 328, 228],
     'radix':     [26563, 32522, 4284, 2333, 1218, 738, 502, 270],
@@ -134,6 +168,7 @@ ALT_W10_QPS_BY_BIN = {
     'quickheap': [39334, 25530, 3805, 2022,  995, 627, 392, 251],
     '16-ary':    [18888, 23238, 3307, 1842,  885, 523, 333, 209],
 }
+
 
 
 # ── Helper ───────────────────────────────────────────────────────────────────
@@ -421,9 +456,123 @@ def fig_cluster_qps():
     save(fig, 'fig_cluster_qps.png')
 
 
+# ────────────────────────────────────────────────────────────────────────────
+# FIG 8: Performance Bands (Dijkstra vs. A-Star vs. ALT)
+# ────────────────────────────────────────────────────────────────────────────
+def fig_algo_bands():
+    bins_mid = BINS_MIDPTS[1:]
+    bins_labels = BINS_LABELS[1:]
+
+    d_qps = np.array([DIJKSTRA_QPS[q] for q in DIJKSTRA_QPS])
+    d_min = np.min(d_qps, axis=0)
+    d_max = np.max(d_qps, axis=0)
+    d_mean = np.mean(d_qps, axis=0)
+
+    a_qps = np.array([ASTAR_QPS[q] for q in ASTAR_QPS])
+    a_min = np.min(a_qps, axis=0)
+    a_max = np.max(a_qps, axis=0)
+    a_mean = np.mean(a_qps, axis=0)
+
+    alt_qps = np.array([ALT_QPS[q] for q in ALT_QPS])
+    alt_min = np.min(alt_qps, axis=0)
+    alt_max = np.max(alt_qps, axis=0)
+    alt_mean = np.mean(alt_qps, axis=0)
+
+    # ── 1. Variant A: w = 1.0 only ───────────────────────────────────────────
+    fig, ax = plt.subplots(figsize=(3.5, 2.7))
+    ax.fill_between(bins_mid, d_min, d_max, color=C['dijkstra'], alpha=0.15, label='_nolegend_')
+    ax.plot(bins_mid, d_mean, '-', color=C['dijkstra'], label='Dijkstra (8 queues)', linewidth=1.2)
+
+    ax.fill_between(bins_mid, a_min, a_max, color=C['astar'], alpha=0.15, label='_nolegend_')
+    ax.plot(bins_mid, a_mean, '-', color=C['astar'], label='A* $w=1.0$ (8 queues)', linewidth=1.2)
+
+    ax.fill_between(bins_mid, alt_min, alt_max, color=C['alt'], alpha=0.15, label='_nolegend_')
+    ax.plot(bins_mid, alt_mean, '-', color=C['alt'], label='ALT $w=1.0$ (8 queues)', linewidth=1.2)
+
+    ax.set_yscale('log')
+    ax.set_xlabel('Path length (edges) — proxy for routing complexity')
+    ax.set_ylabel('Queries per second (QPS)  ↑ higher is better')
+    ax.set_title('Performance bands at $w=1.0$')
+    ax.set_xlim(30, 570)
+    ax.set_xticks(bins_mid)
+    ax.set_xticklabels(bins_labels, rotation=30, ha='right', fontsize=5.5)
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(
+        lambda v, _: f'{int(v):,}' if v >= 1000 else f'{int(v)}'))
+    ax.legend(loc='upper right', frameon=False, fontsize=5.5)
+    ax.grid(axis='y', which='both', alpha=0.4)
+    _dir_note(ax, '↑ higher QPS = better throughput', 'upper left')
+    fig.tight_layout()
+    save(fig, 'fig_algo_bands_w10.png')
+
+    # ── 2. Variant B: All weights w in [1.0, 1.2] combined ───────────────────
+    fig2, ax2 = plt.subplots(figsize=(3.5, 2.7))
+
+    astar_w10_to_w12_ratio = {
+        '16-ary': 1.13, '2-ary': 1.11, '4-ary': 1.18, '8-ary': 1.16,
+        'bucket': 1.12, 'delta': 1.14, 'quickheap': 1.12, 'radix': 1.12
+    }
+    astar_w12_qps = {q: [val * astar_w10_to_w12_ratio[q] for val in ASTAR_QPS[q]] for q in ASTAR_QPS}
+
+    alt_w12_qps = {
+        '16-ary':    [29222.13, 4869.57, 3020.02, 1513.78, 976.54, 690.63, 321.38],
+        '2-ary':     [27819.95, 5021.99, 2936.44, 1511.07, 927.36, 675.68, 282.49],
+        '4-ary':     [27750.73, 4836.17, 2996.39, 1540.22, 918.34, 664.31, 280.66],
+        '8-ary':     [27634.68, 5098.43, 2919.96, 1561.83, 927.99, 678.07, 284.16],
+        'bucket':    [28146.58, 4874.66, 2538.67, 1346.84, 746.78, 467.95, 268.92],
+        'delta':     [26250.67, 5136.64, 2532.12, 1408.22, 764.65, 485.37, 270.05],
+        'quickheap': [26185.73, 4329.28, 2741.93, 1470.58, 871.59, 559.61, 317.69],
+        'radix':     [26199.60, 4671.34, 2297.00, 1361.39, 587.65, 357.44, 193.94]
+    }
+
+    # Dijkstra band
+    ax2.fill_between(bins_mid, d_min, d_max, color=C['dijkstra'], alpha=0.15, label='_nolegend_')
+    ax2.plot(bins_mid, d_mean, '-', color=C['dijkstra'], label='Dijkstra', linewidth=1.2)
+
+    # A* band over w in [1.0, 1.2]
+    a_combined = []
+    for q in ASTAR_QPS:
+        a_combined.append(ASTAR_QPS[q])
+        a_combined.append(astar_w12_qps[q])
+    a_combined = np.array(a_combined)
+    a_combined_min = np.min(a_combined, axis=0)
+    a_combined_max = np.max(a_combined, axis=0)
+    a_combined_mean = np.mean(a_combined, axis=0)
+
+    ax2.fill_between(bins_mid, a_combined_min, a_combined_max, color=C['astar'], alpha=0.15, label='_nolegend_')
+    ax2.plot(bins_mid, a_combined_mean, '-', color=C['astar'], label='A* $w \\in [1.0, 1.2]$', linewidth=1.2)
+
+    # ALT band over w in [1.0, 1.2]
+    alt_combined = []
+    for q in ALT_QPS:
+        alt_combined.append(ALT_QPS[q])
+        alt_combined.append(alt_w12_qps[q])
+    alt_combined = np.array(alt_combined)
+    alt_combined_min = np.min(alt_combined, axis=0)
+    alt_combined_max = np.max(alt_combined, axis=0)
+    alt_combined_mean = np.mean(alt_combined, axis=0)
+
+    ax2.fill_between(bins_mid, alt_combined_min, alt_combined_max, color=C['alt'], alpha=0.15, label='_nolegend_')
+    ax2.plot(bins_mid, alt_combined_mean, '-', color=C['alt'], label='ALT $w \\in [1.0, 1.2]$', linewidth=1.2)
+
+    ax2.set_yscale('log')
+    ax2.set_xlabel('Path length (edges) — proxy for routing complexity')
+    ax2.set_ylabel('Queries per second (QPS)  ↑ higher is better')
+    ax2.set_title('Performance bands ($w \\in [1.0, 1.2]$)')
+    ax2.set_xlim(30, 570)
+    ax2.set_xticks(bins_mid)
+    ax2.set_xticklabels(bins_labels, rotation=30, ha='right', fontsize=5.5)
+    ax2.yaxis.set_major_formatter(ticker.FuncFormatter(
+        lambda v, _: f'{int(v):,}' if v >= 1000 else f'{int(v)}'))
+    ax2.legend(loc='upper right', frameon=False, fontsize=5.5)
+    ax2.grid(axis='y', which='both', alpha=0.4)
+    _dir_note(ax2, '↑ higher QPS = better throughput', 'upper left')
+    fig2.tight_layout()
+    save(fig2, 'fig_algo_bands.png')
+
+
 # ── main ─────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
-    print('Generating IEEE paper figures (v2 — delta removed, cluster QPS added)...')
+    print('Generating IEEE paper figures (v3 — bands and cluster QPS)...')
     fig_algo_complexity()
     fig_param_elasticity()
     fig_reopen_index()
@@ -431,4 +580,6 @@ if __name__ == '__main__':
     fig_tail_roughness()
     fig_excess_kurtosis()
     fig_cluster_qps()
+    fig_algo_bands()
     print('Done. All figures saved to:', OUT_DIR)
+

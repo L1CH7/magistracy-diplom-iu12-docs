@@ -21,8 +21,8 @@ This compression reduces dynamic weight calculation cost to three CPU cycles.
 We implement a cache-conscious SIMD 8-ary priority heap to reduce tree traversal depth. 
 The 8-ary structure matches the width of the AVX2 vector register: eight 32-bit child keys occupy exactly 256 bits, saturating one SIMD load instruction with no wasted lanes. 
 We vectorize the child node search step using AVX2 intrinsics. 
-The child search routine uses the \verb|_mm256_min_epu32| instruction to locate the minimum among all eight child keys within a single 256-bit register --- an instruction-level parallel operation executing on one CPU core, not across cores. 
-This instruction eliminates scalar branch instructions during the down-heap traversal and reduces the hot-loop critical path.
+The child search routine uses the \verb|_mm256_min_epu32| instruction to locate the minimum among all eight child keys within a single 256-bit register, representing an instruction-level parallel operation executing on one CPU core. 
+This instruction eliminates scalar branch instructions during the down-heap traversal and reduces the hot-loop critical path. 
 
 We apply joint word encoding to represent heap elements. 
 We pack the 29-bit distance key and the 3-bit local child index into a single 32-bit word. 
@@ -30,8 +30,8 @@ The horizontal SIMD minimum then returns the packed winner, so the minimum child
 This format also avoids pointer indirection. 
 
 We precompute the ALT landmark distance table with exactly sixteen landmarks. 
-Each landmark stores one 32-bit distance value; sixteen entries occupy $16 \times 4 = 64$ bytes --- exactly one CPU cache line. 
-The ALT heuristic evaluation loop loads all sixteen landmark bounds in a single cache transaction and processes them without L1 misses.
+Each landmark stores one 32-bit distance value; sixteen entries occupy $16 \times 4 = 64$ bytes, which fits exactly one CPU cache line. 
+The ALT heuristic evaluation loop loads all sixteen landmark bounds in a single cache transaction and processes them without L1 misses. 
 
 We utilize Target Register Caching to optimize coordinate access during A* and ALT searches. 
 We load destination coordinates and landmark bounds into CPU registers before entering the main loop. 
@@ -43,3 +43,21 @@ We implement an $O(\text{active})$ partial fast-clearing mechanism.
 We maintain a thread-local stack of visited node indices during traversal. 
 After a query terminates, we iterate over the active stack to reset the modified distance values to infinity. 
 This approach restricts cleanup costs to the size of the relaxed search space.
+
+\subsection{System-Level and Data-Oriented Optimizations Checklist}
+Apart from priority queue structures, we apply a set of hardware-level optimizations to accelerate the routing engine across all evaluated configurations. We summarize these core optimization techniques below:
+\begin{itemize}
+    \item \textbf{Data-Oriented Memory Layout}: We store the graph topology in the Compressed Sparse Row (CSR) format to minimize memory indirection \cite{drepper2007memory}.
+    \item \textbf{Topological Cache-Conscious Reordering}: We reorder node indices along the Morton spatial curve (Z-curve) to match physical coordinate proximity, allowing the hardware prefetcher to load adjacent nodes into L1/L2 caches \cite{drepper2007memory, morton1966computer}.
+    \item \textbf{AoS Structure Alignment}: We encapsulate dynamic traffic state updates in an Array of Structures (AoS) where each record is padded to 64 bytes using the \verb|alignas(64)| directive. This alignment guarantees that a single transaction loads the segment state and prevents cache line split penalties \cite{drepper2007memory}.
+    \item \textbf{Integer Delay Compression ($K_{\text{magic}}$)}: We eliminate dynamic floating-point division by precomputing a 32-bit multiplier $K_{\text{magic}}$ for traffic link delay evaluation. Link delays are computed via fixed-point multiplication followed by a 20-bit right shift, reducing weight calculation to 3--4 CPU cycles \cite{drepper2007memory, fog_optimizing_cpp}.
+    \item \textbf{Temporal FIFO Linear Interpolation}: To prevent FIFO property violations caused by 5-minute time discretisation, we apply linear interpolation to penalties across adjacent intervals, ensuring time-consistency of routing costs \cite{goldberg2005external}.
+    \item \textbf{Memory-Mapped Flat Serialization}: We bypass runtime geometry parsing and network serialization overheads by mapping compiled binary files directly into virtual memory via the \verb|mmap| system call \cite{drepper2007memory}.
+    \item \textbf{Thread-to-Core Binding (CPU Affinity)}: We pin routing threads to physical CPU cores, avoiding scheduler thread migration and L1/L2 cache invalidations \cite{ribeiro2008memory}.
+    \item \textbf{Lock-Free MPMC Task Dispatching}: We utilize lock-free concurrent queues for asynchronous routing task distribution and telemetry updates, isolating network and disk latencies from the routing core \cite{desrochers2015concurrentqueue}.
+    \item \textbf{Fast Partial-State Reinitialization}: We clear search state markers in $O(\text{active})$ time using a visited stack, bypassing $O(V)$ re-initialization sweeps on localized queries.
+\end{itemize}
+
+\subsection{Precomputation and Landmarked Pre-Baked Data}
+To support fast ALT queries, we perform offline precomputation of landmark distances. Our preprocessing pipeline implements a three-level data flow. First, raw geometries are imported into a PostgreSQL database and transformed into an Edge-Based Graph representation to represent turn penalties statically. Second, the landmark selection routine generates 128 candidate landmarks using MinMax (Farthest) and Avoid heuristics. We then select exactly sixteen landmarks from this candidate set using the MaxCover stochastic optimization algorithm \cite{fuchs2010preprocessing}.
+Third, we compute the shortest-path distance vectors from all landmarks to every node using Dijkstra searches. These pre-baked distance matrices are serialized into flat binary dumps. At query time, the ALT heuristic evaluation reads all sixteen precomputed 32-bit bounds in a single 64-byte L1 cache transaction, guaranteeing zero cache miss penalty in the routing hot loop.
