@@ -52,9 +52,9 @@ Apart from priority queue structures, we apply a set of hardware-level optimizat
     \item \textbf{AoS Structure Alignment}: We encapsulate dynamic traffic state updates in an Array of Structures (AoS) where each record is padded to 64 bytes using the \verb|alignas(64)| directive. This alignment guarantees that a single transaction loads the segment state and prevents cache line split penalties \cite{drepper2007memory}.
     \item \textbf{Integer Delay Compression ($K_{\text{magic}}$)}: We eliminate dynamic floating-point division by precomputing a 32-bit multiplier $K_{\text{magic}}$ for traffic link delay evaluation. Link delays are computed via fixed-point multiplication followed by a 20-bit right shift, reducing weight calculation to 3--4 CPU cycles \cite{drepper2007memory, fog_optimizing_cpp}.
     \item \textbf{Temporal FIFO Linear Interpolation}: To prevent FIFO property violations caused by 5-minute time discretisation, we apply linear interpolation to penalties across adjacent intervals, ensuring time-consistency of routing costs \cite{goldberg2005external}.
-    \item \textbf{Memory-Mapped Flat Serialization}: We bypass runtime geometry parsing and network serialization overheads by mapping compiled binary files directly into virtual memory via the \verb|mmap| system call \cite{drepper2007memory}.
-    \item \textbf{Thread-to-Core Binding (CPU Affinity)}: We pin routing threads to physical CPU cores, avoiding scheduler thread migration and L1/L2 cache invalidations \cite{ribeiro2008memory}.
-    \item \textbf{Lock-Free MPMC Task Dispatching}: We utilize lock-free concurrent queues for asynchronous routing task distribution and telemetry updates, isolating network and disk latencies from the routing core \cite{desrochers2015concurrentqueue}.
+    \item \textbf{Memory-Mapped Flat Serialization}: We bypass runtime geometry parsing and graph serialization overheads by mapping compiled binary files directly into virtual memory via the \verb|mmap| system call \cite{drepper2007memory}.
+    \item \textbf{Thread-to-Core Binding (CPU Affinity)}: To stabilize execution latency measurements, we pin the benchmarking thread to a dedicated physical CPU core, preventing OS scheduler migration and L1/L2 cache invalidations \cite{ribeiro2008memory}.
+
     \item \textbf{Fast Partial-State Reinitialization}: We clear search state markers in $O(\text{active})$ time using a visited stack, bypassing $O(V)$ re-initialization sweeps on localized queries.
 \end{itemize}
 
