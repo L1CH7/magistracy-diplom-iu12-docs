@@ -10,10 +10,6 @@ $pdf_mode = 5;
 $xelatex = 'mkdir -p build && xelatex -synctex=1 -interaction=nonstopmode -file-line-error -shell-escape %O %S';
 
 # 4. Search paths for styles, bibliography, and assets
-ensure_path('TEXINPUTS', './latex-ieee-template//:./assets//');
-ensure_path('BIBINPUTS', './latex-ieee-template//');
-ensure_path('BSTINPUTS', './latex-ieee-template//');
-
 if ( !defined &ensure_path ) {
     sub ensure_path {
         my ($var, $path) = @_;
@@ -22,6 +18,11 @@ if ( !defined &ensure_path ) {
         else { $ENV{$var} = $path . $sep; }
     }
 }
+
+ensure_path('TEXINPUTS', './latex-ieee-template//:./assets//');
+ensure_path('BIBINPUTS', './latex-ieee-template//');
+ensure_path('BSTINPUTS', './latex-ieee-template//');
+
 
 # 5. Cleanup
 $cleanup_mode = 1;
