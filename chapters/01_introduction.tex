@@ -1,9 +1,8 @@
 \section{Introduction}
 \label{sec:intro}
 
-Real-time smart city control loops, autonomous logistics, and ride-hailing platforms in the Moscow metropolitan agglomeration demand high-throughput routing engines capable of handling thousands of queries per second under continuous traffic fluctuations. 
-Dynamic urban environments exhibit frequent congestion spikes and road closures. 
-These rapid updates render static pathfinding acceleration techniques, such as Contraction Hierarchies, impractical, as the high cost of recomputing shortcut structures prevents real-time adaptation. 
+The underlying routing engine is designed as a core component of a multi-threaded Smart City simulator running over the scale-free Moscow metropolitan graph. To resolve vehicle conflicts and track dynamic traffic state evolution, the simulator operates in a space-time resource booking regime where graph link weights vary across future time intervals. Because edge travel times depend on the traversal arrival time, bidirectional search paradigms---such as bidirectional Dijkstra, bidirectional A*, and Contraction Hierarchies---are fundamentally inapplicable, as the arrival time at the destination is not known prior to the forward traversal. Consequently, our search framework is restricted to forward-only routing algorithms.
+ 
 
 We model the total routing execution time $T$ as the product of the search iteration count $N_{\text{iter}}$ and the average step latency $t_{\text{iter}}$:
 \begin{equation}
