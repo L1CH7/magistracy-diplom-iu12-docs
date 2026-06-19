@@ -19,15 +19,19 @@ The routing loop calculates link delays using fixed-point arithmetic, shifting t
 This compression reduces dynamic weight calculation cost to three CPU cycles.
 
 We implement a cache-conscious SIMD 8-ary priority heap to reduce tree traversal depth. 
-The 8-ary structure matches the CPU cache line size. 
+The 8-ary structure matches the width of the AVX2 vector register: eight 32-bit child keys occupy exactly 256 bits, saturating one SIMD load instruction with no wasted lanes. 
 We vectorize the child node search step using AVX2 intrinsics. 
-The child search routine uses the \verb|_mm256_min_epu32| instruction to compare eight child keys as a vector within a 256-bit register. 
-This SIMD operation compares keys across register lanes on a single CPU core, eliminating branch instructions during the down-heap operation. 
+The child search routine uses the \verb|_mm256_min_epu32| instruction to locate the minimum among all eight child keys within a single 256-bit register --- an instruction-level parallel operation executing on one CPU core, not across cores. 
+This instruction eliminates scalar branch instructions during the down-heap traversal and reduces the hot-loop critical path.
 
 We apply joint word encoding to represent heap elements. 
-We pack the 32-bit distance key and the 32-bit node index into a single 64-bit unsigned integer. 
-This joint encoding allows the CPU to compare distance and index pairs in a single clock cycle. 
+We pack the 29-bit distance key and the 3-bit local child index into a single 32-bit word. 
+The horizontal SIMD minimum then returns the packed winner, so the minimum child key and its position decode in two bitwise operations with zero additional comparisons. 
 This format also avoids pointer indirection. 
+
+We precompute the ALT landmark distance table with exactly sixteen landmarks. 
+Each landmark stores one 32-bit distance value; sixteen entries occupy $16 \times 4 = 64$ bytes --- exactly one CPU cache line. 
+The ALT heuristic evaluation loop loads all sixteen landmark bounds in a single cache transaction and processes them without L1 misses.
 
 We utilize Target Register Caching to optimize coordinate access during A* and ALT searches. 
 We load destination coordinates and landmark bounds into CPU registers before entering the main loop. 

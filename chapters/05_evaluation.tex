@@ -16,13 +16,14 @@ T_{\text{ms}} = & 0.9921 - (8.46 \times 10^{-5}) \cdot N_{\text{visited}} \\
 \end{aligned}
 \label{eq:ols_formula}
 \end{equation}
-The regression results yield an R-squared value of 0.998 with an F-statistic of $2.041 \times 10^{5}$ ($p < 10^{-3}$). 
-The positive coefficient of 3.3214 for $T_{\text{queue}}$ demonstrates that priority queue operations scale query latency. 
-The negative coefficient for $C_{\text{pop}}$ reflects loop micro-optimizations that offset memory lookup delays. 
+The regression yields $R^2 = 0.998$ with $F = 2.041 \times 10^{5}$ ($p < 10^{-3}$). 
+The coefficient of 3.3214 for $T_{\text{queue}}$ confirms that queue operations scale query latency linearly. 
+The negative coefficient for $C_{\text{pop}}$ reflects per-cycle savings from the SIMD down-heap: the Simd8AryHeap reduces pop-path length, so more cycles-per-pop correspond to fewer total pops. 
 
-ANOVA results verify that the search algorithm, priority queue layout, and path edges exert significant impacts on total execution time. 
-We record F-statistics of $F_{\text{Algorithm}} = 1305.63$, $F_{\text{Queue}} = 30.76$, and $F_{\text{PathEdges}} = 7691.36$ ($p < 10^{-40}$). 
-These metrics confirm that priority queue selection dictates performance limits without regard to the topological routing parameters.
+ANOVA results verify that the search algorithm, priority queue layout, and path edge count all exert significant effects on total execution time. 
+We record $F_{\text{Algorithm}} = 1305.63$, $F_{\text{Queue}} = 30.76$, and $F_{\text{PathEdges}} = 7691.36$ ($p < 10^{-40}$). 
+The dominant F-statistic belongs to path length, confirming that topological complexity drives the execution budget. 
+Queue selection ranks second: it shapes the constant factor but not the growth law.
 
 \subsection{The Three-Step Filtering Pipeline}
 
@@ -32,81 +33,100 @@ To identify the optimal routing configuration, we establish a three-step filteri
 We isolate the relationship between path length $L$ and search latency $T_{\text{ms}}$ using a power-law model $T_{\text{ms}} = k \cdot L^{\alpha}$. 
 Dijkstra routing explores a broad circular envelope, producing a complexity exponent of $\alpha = 2.0947$ ($R^2 = 0.7724$). 
 A* search with $w=1.0$ exhibits directed search but suffers from high exploration width, yielding $\alpha = 2.4506$ ($R^2 = 0.8389$). 
-In contrast, ALT routing with $w=1.0$ restricts the search space to a narrow corridor, achieving a complexity exponent of $\alpha = 1.8690$ ($R^2 = 0.4889$). 
+ALT routing with $w=1.0$ restricts the search space to a narrow corridor, achieving $\alpha = 1.8690$ ($R^2 = 0.4889$). 
 
-Figure \ref{fig:complexity_elasticity} (Panel A) illustrates this microarchitectural isomorphism. 
-The complexity exponents remain parallel across different queue backends, showing that the priority queue acts as a scaling constant while the search algorithm dictates the exponent $\alpha$. 
-We filter out Dijkstra and A* due to their excessive search envelopes, leaving ALT as the candidate paradigm.
+Figure~\ref{fig:complexity} illustrates this microarchitectural isomorphism. 
+Within each algorithm, all eight queue backends produce nearly identical $\alpha$ values: the spread is $\pm 0.03$ for Dijkstra and $\pm 0.03$ for A*, and $\pm 0.06$ for ALT. 
+The priority queue acts as a multiplicative constant $k$ while the search algorithm determines the exponent $\alpha$. 
+Figure~\ref{fig:elasticity} shows that A* and Dijkstra carry positive but modest QPS elasticity across weight levels, while ALT exhibits strong sensitivity: the $\alpha$ exponent falls to 1.69 for RadixHeap, the lowest of all tested configurations. 
+We filter Dijkstra and A* due to their excessive search envelopes.
 
-\subsubsection{Step 2: Accuracy and Re-opening Filtering}
-We examine the impact of heuristic inflation by scaling the ALT search weight $w$ beyond 1.0. 
-Figure \ref{fig:ghost_reopening} (Panel A) shows that scaling $w > 1.0$ triggers a node re-opening storm. 
-At $w=1.0$, the re-opening index $\rho$ is near 1.10. 
-At $w=1.20$, $\rho$ exceeds 1.15. 
-This re-opening storm floods the priority queue with duplicate states. 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{assets/fig_algo_complexity.png}
+\caption{Search-space complexity exponent $\alpha$ per queue backend for Dijkstra, A*, and ALT $w=1.0$. Dashed lines mark per-algorithm means. All queues within each algorithm cluster tightly, confirming microarchitectural isomorphism.}
+\label{fig:complexity}
+\end{figure}
 
-Figure \ref{fig:ghost_reopening} (Panel B) tracks the resulting ghost-node density. 
-The SimdRadixHeap and SimdBucketQueue encounter massive memory pollution, with ghost densities climbing from 0.33 to 0.45. 
-This pollution degrades throughput, producing negative throughput elasticity. 
-Thus, we restrict the ALT algorithm to $w=1.0$ to guarantee monotonicity.
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{assets/fig_param_elasticity.png}
+\caption{ALT throughput elasticity $\varepsilon_w = \Delta\%\,QPS\,/\,\Delta\%\,w$ for each queue backend. D-ary heaps carry strongly positive elasticity. SimdRadix collapses to $\varepsilon_w = -3.58$ at $w=1.05$. SimdBucket and SimdDelta hover near zero.}
+\label{fig:elasticity}
+\end{figure}
 
-\subsubsection{Step 3: Hardware Stability Filtering}
-We evaluate tail latency stability under priority queue load. 
-Figure \ref{fig:hardware_strain} reports tail latency roughness ($p99 / p50$) and excess kurtosis. 
-SimdQuickHeap exhibits high kurtosis values up to 112.63 and tail roughness factors. 
-This variance arises from the instruction-level checks and branch mispredictions in the lazy sorting logic. 
+\subsubsection{Step 2: Weight Constraint and Monotonicity Filtering}
+Two failure modes disqualify $w > 1.0$.
 
-In contrast, our cache-conscious Simd8AryHeap and the bucket-based SimdRadixHeap show stable, deterministic profiles. 
-Simd8AryHeap records a roughness factor under 4.0. 
-This stable footprint confirms that hardware-friendly layouts minimize performance jitter.
+\textbf{Accuracy bound.} 
+At $w=1.2$, paths exceeding 450 edges carry a mean relative error of 9.8\% and produce zero exact-match results. 
+A production routing engine cannot accept this error regime.
+
+\textbf{Radix monotonicity collapse.} 
+ALT with $w > 1.0$ emits non-monotone priority keys: the inflated heuristic $f(v) = g(v) + w \cdot h(v)$ can decrease for nodes already in the open set, violating RadixHeap's strict monotonicity invariant. 
+Each key violation triggers an $O(B)$ bucket-scan recovery pass. 
+Figure~\ref{fig:radix_collapse} exposes the consequence: SimdRadixHeap mean latency climbs from 2.94\,ms at $w=1.0$ to 22.66\,ms at $w=1.2$ --- a $7.7\times$ explosion. 
+Ghost-node density falls from 0.456 to 0.089 in parallel: the search frontier is corrupted before it expands fully, so fewer productive nodes enter the queue. 
+Figure~\ref{fig:reopen} shows the re-opening index $\rho = N_{\text{pop}} / N_{\text{visited}}$ for RadixHeap \emph{drops} from 1.146 to 1.022 as $w$ increases --- the search terminates prematurely rather than correctly. 
+The QPS elasticity for RadixHeap is $-3.58$ at $w=1.05$; for Simd8AryHeap it is $+7.27$. 
+We fix $w = 1.0$ for all remaining evaluation.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{assets/fig_reopen_index.png}
+\caption{Re-opening index $\rho$ under ALT weight sweep. SimdRadix $\rho$ falls as $w$ increases --- the heap terminates the search early due to non-monotone key corruption. D-ary $\rho$ rises slightly, reflecting a correct (if less optimal) search contraction.}
+\label{fig:reopen}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{assets/fig_radix_collapse.png}
+\caption{SimdRadix mean latency (solid) and ghost-node density (dashed) vs. heuristic weight $w$, compared to Simd8AryHeap. RadixHeap latency grows $7.7\times$ while ghost density collapses --- the monotonicity invariant violation corrupts the search frontier.}
+\label{fig:radix_collapse}
+\end{figure}
+
+\subsubsection{Step 3: Tail Latency Stability Filtering}
+With $w=1.0$ fixed, we evaluate hardware stability using excess kurtosis and tail roughness $p_{99}/p_{50}$.
+Figure~\ref{fig:kurtosis} reports excess kurtosis per queue. 
+SimdBucketQueue records excess kurtosis of 41.2 and roughness 12.9 --- one in thirteen queries runs 12$\times$ slower than the median. 
+The SimdDeltaQueue implementation is identical in observed metrics (kurtosis 41.8, roughness 12.9) and is excluded as a duplicate. 
+This variance in SimdBucketQueue arises from bucket-scan overhead on long paths, which grows with path complexity and produces a heavy upper tail. 
+SimdQuickHeap records kurtosis 16.0 and roughness 9.1, elevated by branch mispredictions in its lazy sifting routine. 
+Figure~\ref{fig:roughness} shows Simd8AryHeap achieves the most stable profile: kurtosis 12.4 and roughness 8.5. 
+SimdRadixHeap records kurtosis 20.1 and roughness 9.0. 
+We eliminate SimdBucketQueue, SimdDeltaQueue, and SimdQuickHeap from the candidate set. 
+Both Simd8AryHeap and SimdRadixHeap qualify for final throughput evaluation.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{assets/fig_excess_kurtosis.png}
+\caption{Excess kurtosis per queue backend under ALT $w=1.0$. SimdBucket and SimdDelta exhibit kurtosis $>40$, indicating heavy tail behavior. D-ary heaps and SimdRadix remain below 21.}
+\label{fig:kurtosis}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{assets/fig_tail_roughness.png}
+\caption{Tail roughness $p_{99}/p_{50}$ per queue backend under ALT $w=1.0$. A value of 12.9 for SimdBucket means the slowest 1\% of queries run 12.9$\times$ above the median. SimdRadix and Simd8AryHeap stay below 9.1.}
+\label{fig:roughness}
+\end{figure}
 
 \subsection{Journey Profile Clustering}
 
-K-Means clustering groups the 1500 benchmark runs into three spatial profiles based on edge count and route length. 
-Table \ref{tab:qps_performance} summarizes queue throughput (QPS) across these profiles under ALT $w=1.0$.
+K-Means clustering groups the 1500 benchmark runs into three spatial profiles. 
+Figure~\ref{fig:cluster_qps} plots QPS against path length in edges for all candidate queues at ALT $w=1.0$. 
+The three shaded regions correspond to the K-Means cluster boundaries.
 
-For Localized Profile queries (Cluster 2, average length 12.3 km), SimdRadixHeap achieves 3147 QPS, outperforming Simd8AryHeap at 2620 QPS. 
-In the Megalopolis Profile (Cluster 1, average length 43.7 km), execution time is dominated by queue operations. 
-Here, SimdRadixHeap maintains 631 QPS, while Simd8AryHeap delivers 449 QPS. 
-SimdQuickHeap drops to 499 QPS due to sorting overhead. 
-These results confirm SimdRadixHeap as the optimal backend for monotone ALT queries.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{assets/complexity_elasticity_facets.png}
-\caption{Complexity exponent $\alpha$ across algorithmic paradigms (Panel A) and parametric throughput elasticity under weight variations (Panel B).}
-\label{fig:complexity_elasticity}
-\end{figure}
+In the Localized region (Cluster 2, 30--150 edges, mean 12.3\,km), SimdRadixHeap achieves 32\,522 QPS on 30--60 edge paths and 4\,284 QPS on 60--100 edge paths --- the highest values across all queues. 
+Simd8AryHeap trails at 27\,572 and 3\,240 QPS respectively for the same bins. 
+In the Megalopolis region (Cluster 1, above 300 edges, mean 43.7\,km), queue operations dominate the execution budget. 
+SimdRadixHeap maintains 502 QPS on 300--450 edge paths and 270 QPS on 450--600 edge paths; Simd8AryHeap reaches 328 and 228 QPS. 
+SimdBucketQueue occupies second place at 300--450 edges (441 QPS) but holds no advantage over SimdRadixHeap at any bin. 
+SimdRadixHeap leads across all three cluster profiles; its advantage over Simd8AryHeap grows from $18\%$ for localized queries to $53\%$ for megalopolis journeys --- consistent with its lower complexity exponent $\alpha = 1.69$ identified in Step~1.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\linewidth]{assets/ghost_reopening_cascade.png}
-\caption{Node re-opening index $\rho$ (Panel A) and ghost-node memory pollution density (Panel B) as functions of heuristic weight $w$ under ALT routing.}
-\label{fig:ghost_reopening}
+\includegraphics[width=\linewidth]{assets/fig_cluster_qps.png}
+\caption{ALT $w=1.0$ throughput (QPS, log scale, higher is better) vs. path length in edges. Shaded regions mark K-Means cluster boundaries. SimdRadix leads at all complexity levels.}
+\label{fig:cluster_qps}
 \end{figure}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{assets/hardware_strain_matrix.png}
-\caption{Tail latency roughness factor (Panel A) and excess kurtosis (Panel B) illustrating microarchitectural hardware strain under queue execution noise.}
-\label{fig:hardware_strain}
-\end{figure}
-
-\begin{table}[t]
-\caption{Throughput (QPS) across K-Means Journey Clusters under ALT $w=1.0$}
-\label{tab:qps_performance}
-\centering
-\begin{tabular}{lccc}
-\toprule
-\textbf{Queue Backend} & \textbf{Cluster 0 (Regional)} & \textbf{Cluster 1 (Megalopolis)} & \textbf{Cluster 2 (Localized)} \\
-\midrule
-Simd2AryHeap & 1516.99 & 429.46 & 2499.12 \\
-Simd4AryHeap & 1554.19 & 444.35 & 2626.46 \\
-Simd8AryHeap & 1594.81 & 449.11 & 2620.11 \\
-Simd16AryHeap & 1558.92 & 451.93 & 2623.05 \\
-SimdBucketQueue & 1819.85 & 569.30 & 2895.38 \\
-SimdRadixHeap & 2007.87 & 631.57 & 3147.48 \\
-SimdQuickHeap & 1690.49 & 499.99 & 2633.15 \\
-\bottomrule
-\end{tabular}
-\end{table}

@@ -17,8 +17,8 @@ We classify the 1500 benchmark journeys using K-Means clustering to analyze scal
 The clustering algorithm leverages journey distance, edge count, and node exploration counts as features. 
 We identify three distinct routing profiles:
 \begin{itemize}
-\item \textbf{Localized Profile}: Journeys under 5 km. Graph traversal overhead is small. Initialization and stack cleanup costs dominate the execution profile.
-\item \textbf{Regional Profile}: Journeys between 5 and 25 km. Traversal cost and queue operations exhibit equal latency footprints. 
-\item \textbf{Megalopolis Profile}: Journeys exceeding 25 km. The priority queue hot loop determines the execution time. 
+\item \textbf{Localized Profile}: Cluster 2, mean distance 12.3\,km. Graph traversal overhead is small. Initialization and fast-clear costs dominate the execution profile.
+\item \textbf{Regional Profile}: Cluster 0, mean distance 28.4\,km. Traversal cost and queue operations exhibit equal latency footprints. 
+\item \textbf{Megalopolis Profile}: Cluster 1, mean distance 43.7\,km. The priority queue hot loop determines execution time.
 \end{itemize}
 This classification allows us to observe how priority queue performance scales from local queries to long-distance paths.
