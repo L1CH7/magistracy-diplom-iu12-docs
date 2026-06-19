@@ -6,8 +6,7 @@ Second, we validate performance significance with ANOVA.
 Third, we outline the three-step filtering pipeline to isolate the optimal configurations.
 
 \subsection{Execution Latency Decomposition}
-
-Our OLS regression models total routing latency $T_{\text{ms}}$ as a function of visited nodes, queue execution time, and priority pop cycles:
+Our OLS regression models query latency $T_{\text{ms}}$ against visited nodes $N_{\text{visited}}$, queue execution time $T_{\text{queue}}$, and pop cycles $C_{\text{pop}}$:
 \begin{equation}
 \begin{aligned}
 T_{\text{ms}} = & 0.9921 - (8.46 \times 10^{-5}) \cdot N_{\text{visited}} \\
@@ -15,14 +14,7 @@ T_{\text{ms}} = & 0.9921 - (8.46 \times 10^{-5}) \cdot N_{\text{visited}} \\
 \end{aligned}
 \label{eq:ols_formula}
 \end{equation}
-The regression yields $R^2 = 0.998$ with $F = 2.041 \times 10^{5}$ ($p < 10^{-3}$). 
-The coefficient of 3.3214 for $T_{\text{queue}}$ confirms that queue operations scale query latency linearly. 
-The negative coefficient for $C_{\text{pop}}$ reflects per-cycle savings from the SIMD down-heap: the Simd8AryHeap reduces pop-path length, so more cycles-per-pop correspond to fewer total pops. 
-
-ANOVA results verify that the search algorithm, priority queue layout, and path edge count all exert significant effects on total execution time. 
-We record $F_{\text{Algorithm}} = 1305.63$, $F_{\text{Queue}} = 30.76$, and $F_{\text{PathEdges}} = 7691.36$ ($p < 10^{-40}$). 
-The dominant F-statistic belongs to path length, confirming that topological complexity drives the execution budget. 
-Queue selection ranks second: it shapes the constant factor but not the growth law.
+with $R^2 = 0.998$ and $F = 2.041 \times 10^{5}$ ($p < 10^{-3}$). The $T_{\text{queue}}$ coefficient of 3.3214 confirms that queue operations scale query latency linearly. The negative coefficient for $C_{\text{pop}}$ reflects per-cycle savings from the SIMD down-heap: Simd8AryHeap reduces pop-path length, so more CPU cycles spent per pop correspond to fewer total pop operations. ANOVA results verify that the algorithm, queue layout, and path edge count all significantly affect execution time: $F_{\text{Algorithm}} = 1305.63$, $F_{\text{Queue}} = 30.76$, and $F_{\text{PathEdges}} = 7691.36$ ($p < 10^{-40}$). Path length dominates, confirming that topological complexity drives the execution budget, while queue selection shapes the constant factor.
 \subsection{Macro-Topological Search Space Scaling and Isomorphism Zones}
 To prevent visual clutter and evaluate the full matrix of configurations simultaneously, we reject discrete line plotting in favor of continuous behavioral bands (Figure~\ref{fig:algo_bands}). We map all seven candidate priority queues over three routing algorithms, covering $1 + 2 \times 5$ parameter variations. The duplicate Delta queue is explicitly excluded in favor of the identical Bucket queue. Each band represents an algorithmic paradigm partitioned by its empirical scaling boundaries: the upper limit is dictated by the scalar 2-ary baseline heap, while the lower bound is constrained by our vectorized SIMD architectures. Despite minor overlap in the mid-range path bins, the ALT band demonstrates clear performance superiority over A* and Dijkstra throughout the entire path complexity range.
 
@@ -139,12 +131,12 @@ K-Means clustering groups the 1500 benchmark runs into three spatial profiles.
 Figure~\ref{fig:cluster_qps} plots QPS against path length in edges for all candidate queues at ALT $w=1.0$. 
 The three shaded regions correspond to the K-Means cluster boundaries.
 
-In the Localized region (Cluster 2, 30--150 edges, mean 12.3\,km), SimdRadixHeap achieves 32,522~QPS on 30--60 edge paths and 4,284~QPS on 60--100 edge paths --- the highest values across all queues. 
+In the Short-Range region (Cluster 2, 30--150 edges, mean 12.3\,km), SimdRadixHeap achieves 32,522~QPS on 30--60 edge paths and 4,284~QPS on 60--100 edge paths --- the highest values across all queues. 
 Simd8AryHeap trails at 27,572 and 3,240~QPS respectively for the same bins. 
-In the Megalopolis region (Cluster 1, above 300 edges, mean 43.7\,km), queue operations dominate the execution budget. 
+In the Long-Range region (Cluster 1, above 300 edges, mean 43.7\,km), queue operations dominate the execution budget. 
 SimdRadixHeap maintains 502~QPS on 300--450 edge paths and 270~QPS on 450--600 edge paths; Simd8AryHeap reaches 328 and 228~QPS. 
 SimdBucketQueue occupies second place at 300--450 edges (441~QPS) but holds no advantage over SimdRadixHeap at any bin. 
-SimdRadixHeap leads across all three cluster profiles; its advantage over Simd8AryHeap grows from $18\%$ for localized queries to $53\%$ for megalopolis journeys --- consistent with its lower complexity exponent $\alpha = 1.69$ identified in Step~1.
+SimdRadixHeap leads across all three cluster profiles; its advantage over Simd8AryHeap grows from $18\%$ for short-range queries to $53\%$ for long-range journeys --- consistent with its lower complexity exponent $\alpha = 1.69$ identified in Step~1.
 
 \begin{figure}[t]
 \centering

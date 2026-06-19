@@ -188,17 +188,8 @@ def _bar_color(q):
     return C['8ary']  # 8-ary
 
 def _dir_note(ax, text, loc='upper right'):
-    """Add a directional annotation (higher/lower is better)."""
-    props = dict(boxstyle='round,pad=0.2', facecolor='#f0f0f0',
-                 edgecolor='#aaaaaa', linewidth=0.5, alpha=0.8)
-    ax.annotate(text, xy=(0, 1) if 'upper' in loc else (1, 0),
-                xycoords='axes fraction',
-                xytext=(0.02, 0.96) if 'upper left' in loc else
-                       (0.98, 0.96) if 'upper right' in loc else (0.98, 0.04),
-                textcoords='axes fraction',
-                ha='right' if 'right' in loc else 'left',
-                va='top' if 'upper' in loc else 'bottom',
-                fontsize=5, bbox=props)
+    """Disabled directional annotation (kept on axes only)."""
+    return
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -433,11 +424,11 @@ def fig_cluster_qps():
     ax.axvspan(300, 600, alpha=0.06, color='#d6604d', label='_nolegend_')
 
     # cluster labels
-    ax.text(90,   1600, 'Localized\n(Cluster 2)', fontsize=4.5, ha='center',
+    ax.text(90,   1600, 'Short-Range\n(Cluster 2)', fontsize=4.5, ha='center',
             color='#2166ac', alpha=0.7, va='bottom')
-    ax.text(225,  600,  'Regional\n(Cluster 0)', fontsize=4.5, ha='center',
+    ax.text(225,  600,  'Medium-Range\n(Cluster 0)', fontsize=4.5, ha='center',
             color='#4d9221', alpha=0.7, va='bottom')
-    ax.text(450,  280,  'Megalopolis\n(Cluster 1)', fontsize=4.5, ha='center',
+    ax.text(450,  280,  'Long-Range\n(Cluster 1)', fontsize=4.5, ha='center',
             color='#d6604d', alpha=0.7, va='bottom')
 
     ax.set_yscale('log')
