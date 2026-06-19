@@ -139,11 +139,11 @@ K-Means clustering groups the 1500 benchmark runs into three spatial profiles.
 Figure~\ref{fig:cluster_qps} plots QPS against path length in edges for all candidate queues at ALT $w=1.0$. 
 The three shaded regions correspond to the K-Means cluster boundaries.
 
-In the Localized region (Cluster 2, 30--150 edges, mean 12.3\,km), SimdRadixHeap achieves 32\,522 QPS on 30--60 edge paths and 4\,284 QPS on 60--100 edge paths --- the highest values across all queues. 
-Simd8AryHeap trails at 27\,572 and 3\,240 QPS respectively for the same bins. 
+In the Localized region (Cluster 2, 30--150 edges, mean 12.3\,km), SimdRadixHeap achieves 32,522~QPS on 30--60 edge paths and 4,284~QPS on 60--100 edge paths --- the highest values across all queues. 
+Simd8AryHeap trails at 27,572 and 3,240~QPS respectively for the same bins. 
 In the Megalopolis region (Cluster 1, above 300 edges, mean 43.7\,km), queue operations dominate the execution budget. 
-SimdRadixHeap maintains 502 QPS on 300--450 edge paths and 270 QPS on 450--600 edge paths; Simd8AryHeap reaches 328 and 228 QPS. 
-SimdBucketQueue occupies second place at 300--450 edges (441 QPS) but holds no advantage over SimdRadixHeap at any bin. 
+SimdRadixHeap maintains 502~QPS on 300--450 edge paths and 270~QPS on 450--600 edge paths; Simd8AryHeap reaches 328 and 228~QPS. 
+SimdBucketQueue occupies second place at 300--450 edges (441~QPS) but holds no advantage over SimdRadixHeap at any bin. 
 SimdRadixHeap leads across all three cluster profiles; its advantage over Simd8AryHeap grows from $18\%$ for localized queries to $53\%$ for megalopolis journeys --- consistent with its lower complexity exponent $\alpha = 1.69$ identified in Step~1.
 
 \begin{figure}[t]

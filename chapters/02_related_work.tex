@@ -11,29 +11,29 @@ We evaluate three core shortest path routing paradigms that shape the search spa
 \begin{itemize}
     \item \textbf{Dijkstra's Algorithm}: This baseline search explores nodes in increasing order of their path distance from the source. The priority key of a node $v$ is $key(v) = g(v)$, where $g(v)$ is the exact distance from the origin. It guarantees optimal path retrieval but relaxes a large circular search envelope.
     \item \textbf{A* Search}: This heuristic-guided search restricts the search envelope toward the destination $t$. The priority key is $key(v) = g(v) + w \cdot h(v)$, where $h(v)$ is the Euclidean distance estimate from $v$ to $t$, and $w \ge 1.0$ is the heuristic weight factor. When $w = 1.0$ and $h(v)$ is admissible, the search is optimal. For $w > 1.0$, the search relaxes exact optimality to guarantee a strictly deterministic sub-optimal search with a bounded path stretch, while significantly narrowing the search space.
-    \item \textbf{ALT Algorithm}: This algorithm integrates A* search with landmark nodes and the triangle inequality \cite{goldberg2004alt}. Given a set of precomputed landmark nodes $L$, the lower bound distance estimate from node $v$ to destination $t$ is defined as:
+    \item \textbf{ALT Algorithm}: This algorithm integrates A* search with landmark nodes and the triangle inequality~\cite{goldberg2004alt}. Given a set of precomputed landmark nodes $L$, the lower bound distance estimate from node $v$ to destination $t$ is defined as:
     \begin{equation}
     h_{\text{ALT}}(v) = \max_{l \in L} \{ \max(d(l, t) - d(l, v), d(v, l) - d(t, l)) \}
     \end{equation}
-    where $d(\cdot, \cdot)$ denotes precomputed shortest path distances. The priority key is $key(v) = g(v) + w \cdot h_{\text{ALT}}(v)$. The landmarks provide highly directed estimates that adjust dynamically to traffic congestion changes, making ALT suitable for real-time metropolitan routing. Landmark selection algorithms, studied by Fuchs \cite{fuchs2010preprocessing}, determine lower bound quality and search space reduction.
+    where $d(\cdot, \cdot)$ denotes precomputed shortest path distances. The priority key is $key(v) = g(v) + w \cdot h_{\text{ALT}}(v)$. The landmarks provide highly directed estimates that adjust dynamically to traffic congestion changes, making ALT suitable for real-time metropolitan routing. Landmark selection algorithms, studied by Fuchs~\cite{fuchs2010preprocessing}, determine lower bound quality and search space reduction.
 \end{itemize} 
 
 Priority queue selection dictates the step latency constant $t_{\text{iter}}$. 
-Cherkassky et al. \cite{cherkassky1994shortest} evaluate priority queues on sparse networks. 
+Cherkassky et al.~\cite{cherkassky1994shortest} evaluate priority queues on sparse networks. 
 Their experiments show that Fibonacci heaps suffer from high constant factors and poor cache locality. 
-Simple binary heaps outperform Fibonacci heaps on real-world graphs but remain bottlenecked by branch mispredictions in their element comparison loops \cite{biggar_sorting}. 
-To alleviate memory latency and branching penalties, multi-ary heaps (such as 4-ary and 8-ary heaps) restrict tree depth and improve cache-line utilization, making them highly effective for shortest path routing on road graphs \cite{outerloop_heap}. 
-Ahuja et al. \cite{ahuja1990faster} introduce radix heaps to exploit integer edge weights, bounds, and monotonicity. 
+Simple binary heaps outperform Fibonacci heaps on real-world graphs but remain bottlenecked by branch mispredictions in their element comparison loops~\cite{biggar_sorting}. 
+To alleviate memory latency and branching penalties, multi-ary heaps (such as 4-ary and 8-ary heaps) restrict tree depth and improve cache-line utilization, making them highly effective for shortest path routing on road graphs~\cite{outerloop_heap}. 
+Ahuja et al.~\cite{ahuja1990faster} introduce radix heaps to exploit integer edge weights, bounds, and monotonicity. 
 Radix heaps achieve near-constant time complexities by grouping keys into dynamic buckets. 
-Similarly, the concept of relaxed sorting is utilized in parallel algorithms such as Delta-stepping \cite{meyer2003delta}, where grouping nodes into buckets of width $\Delta$ avoids strict ordering overhead. 
+Similarly, the concept of relaxed sorting is utilized in parallel algorithms such as Delta-stepping~\cite{meyer2003delta}, where grouping nodes into buckets of width $\Delta$ avoids strict ordering overhead. 
 
-Breitling et al. \cite{quickheap_arxiv} propose QuickHeap to minimize element comparison counts through lazy sorting, which also incorporates SIMD vectorization for pivot selection. 
+Breitling et al.~\cite{quickheap_arxiv} propose QuickHeap to minimize element comparison counts through lazy sorting, which also incorporates SIMD vectorization for pivot selection. 
 While QuickHeap achieves strong theoretical bounds, the authors acknowledge that cache misses during graph traversal on road networks diminish SIMD acceleration benefits. 
 Furthermore, the lazy deferral mechanism introduces branch prediction overhead in the heap sifting routine. 
 We examine how these instruction-level overheads degrade CPU performance on metropolitan road networks and contrast them against our cache-conscious SIMD $d$-ary heap layout.
 
 \subsection{Architectural Divergence from the KIT SimdQuickHeap Framework}
-Our high-performance routing loop fundamentally reconsiders the performance thresholds established by Breitling, Groot Koerkamp, and Williams \cite{quickheap_arxiv}. The KIT framework evaluated their vectorized partitioning layout (\texttt{SimdQuickHeap}) utilizing a single-threaded Rust pipeline on a server-class AMD EPYC 9684X (Zen 4) CPU with hardware-level AVX-512 vector support across sparse node-based DIMACS networks and random hyperbolic graphs (RHG) \cite{goldberg2005external}. They bypassed the lack of a native \texttt{decreaseKey} operation by packing a 32-bit vertex ID and a 32-bit distance into a flat 64-bit word, noting that on standard road networks, graph-reading cache transactions heavily masked priority queue speedups. Moreover, their evaluations were restricted to static graphs.
+Our high-performance routing loop fundamentally reconsiders the performance thresholds established by Breitling, Groot Koerkamp, and Williams~\cite{quickheap_arxiv}. The KIT framework evaluated their vectorized partitioning layout (\texttt{SimdQuickHeap}) utilizing a single-threaded Rust pipeline on a server-class AMD EPYC 9684X (Zen 4) CPU with hardware-level AVX-512 vector support across sparse node-based DIMACS networks and random hyperbolic graphs (RHG)~\cite{goldberg2005external}. They bypassed the lack of a native \texttt{decreaseKey} operation by packing a 32-bit vertex ID and a 32-bit distance into a flat 64-bit word, noting that on standard road networks, graph-reading cache transactions heavily masked priority queue speedups. Moreover, their evaluations were restricted to static graphs.
 
 Our infrastructure shifts this paradigm by targeting real-time Smart City control loops within the dense Moscow metropolitan agglomeration. Unlike Breitling's static evaluations, our methodology integrates the priority queue into a dynamic routing framework where traffic congestion constantly updates link weights via the Bureau of Public Roads (BPR) delay function. Furthermore, we adapt SIMD vectorization for consumer-class hardware: while the KIT framework relies on 512-bit registers (AVX-512), we implement a 256-bit AVX2 pipeline (processing eight 32-bit keys per cycle), running on a commodity AMD Ryzen 5 5600H (Zen 3) processor.
 

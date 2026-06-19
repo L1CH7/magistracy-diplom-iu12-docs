@@ -1,7 +1,7 @@
 \section{High-Performance Implementation Details}
 \label{sec:implementation}
 
-We construct our single-threaded routing engine in C++ using data-oriented design principles to maximize hardware efficiency \cite{drepper2007memory}. 
+We construct our single-threaded routing engine in C++ using data-oriented design principles to maximize hardware efficiency~\cite{drepper2007memory}. 
 We pack the road network topology into a Compressed Sparse Row (CSR) layout. 
 To incorporate traffic turn restrictions without conditional jumps in the hot loop, we apply dual graph line inversion. 
 Road segments become nodes in our computational graph, and turns at intersections become edges. 
@@ -18,7 +18,7 @@ To eliminate runtime weight calculation overhead, we pre-compute and store link 
 
 We implement a cache-conscious SIMD 8-ary priority heap to reduce tree traversal depth. 
 The 8-ary structure matches the width of the AVX2 vector register: eight 32-bit child keys occupy exactly 256 bits, saturating one SIMD load instruction with no wasted lanes. 
-We vectorize the child node search step using AVX2 intrinsics, aligning with hardware-level optimization guidelines for SIMD registers, data packing, and alignment on x86 architectures \cite{kusswurm2014modern}. 
+We vectorize the child node search step using AVX2 intrinsics, aligning with hardware-level optimization guidelines for SIMD registers, data packing, and alignment on x86 architectures~\cite{kusswurm2014modern}. 
 The child search routine uses the \verb|_mm256_min_epu32| instruction to locate the minimum among all eight child keys within a single 256-bit register, representing an instruction-level parallel operation executing on one CPU core. 
 This instruction eliminates scalar branch instructions during the down-heap traversal and reduces the hot-loop critical path. This design explicitly targets modern x86-64 desktop and server architectures supporting AVX2 instructions, trading platform portability (e.g., to ARM or Apple Silicon architectures) for maximum low-level vectorization throughput.
  
@@ -46,16 +46,16 @@ This approach restricts cleanup costs to the size of the relaxed search space.
 \subsection{System-Level and Data-Oriented Optimizations Checklist}
 Apart from priority queue structures, we apply a set of hardware-level optimizations to accelerate the routing engine across all evaluated configurations. We summarize these core optimization techniques below:
 \begin{itemize}
-    \item \textbf{Data-Oriented Memory Layout}: We store the graph topology in the Compressed Sparse Row (CSR) format to minimize memory indirection \cite{drepper2007memory}.
-    \item \textbf{Topological Cache-Conscious Reordering}: We reorder node indices along the Morton spatial curve (Z-curve) to match physical coordinate proximity, allowing the hardware prefetcher to load adjacent nodes into L1/L2 caches \cite{drepper2007memory, morton1966computer}.
-    \item \textbf{AoS Structure Alignment}: We encapsulate dynamic traffic state updates in an Array of Structures (AoS) where each record is padded to 64 bytes using the \verb|alignas(64)| directive. This alignment guarantees that a single transaction loads the segment state and prevents cache line split penalties \cite{drepper2007memory}.
-    \item \textbf{Pre-Baked Edge Weights}: We eliminate runtime traffic delay computations in the hot loop by pre-baking all link travel times into static integer arrays during graph compilation, bypassing dynamic BPR function evaluation \cite{drepper2007memory, fog_optimizing_cpp}.
-    \item \textbf{Memory-Resident Graph Layout}: We bypass runtime geometry parsing and allocation overheads by keeping the compiled graph topology pre-allocated in virtual memory, guaranteeing fast direct memory lookups \cite{drepper2007memory}.
-    \item \textbf{Thread-to-Core Binding (CPU Affinity)}: To stabilize execution latency measurements, we pin the benchmarking thread to a dedicated physical CPU core, preventing OS scheduler migration and L1/L2 cache invalidations \cite{ribeiro2008memory}.
+    \item \textbf{Data-Oriented Memory Layout}: We store the graph topology in the Compressed Sparse Row (CSR) format to minimize memory indirection~\cite{drepper2007memory}.
+    \item \textbf{Topological Cache-Conscious Reordering}: We reorder node indices along the Morton spatial curve (Z-curve) to match physical coordinate proximity, allowing the hardware prefetcher to load adjacent nodes into L1/L2 caches~\cite{drepper2007memory, morton1966computer}.
+    \item \textbf{AoS Structure Alignment}: We encapsulate dynamic traffic state updates in an Array of Structures (AoS) where each record is padded to 64 bytes using the \verb|alignas(64)| directive. This alignment guarantees that a single transaction loads the segment state and prevents cache line split penalties~\cite{drepper2007memory}.
+    \item \textbf{Pre-Baked Edge Weights}: We eliminate runtime traffic delay computations in the hot loop by pre-baking all link travel times into static integer arrays during graph compilation, bypassing dynamic BPR function evaluation~\cite{drepper2007memory, fog_optimizing_cpp}.
+    \item \textbf{Memory-Resident Graph Layout}: We bypass runtime geometry parsing and allocation overheads by keeping the compiled graph topology pre-allocated in virtual memory, guaranteeing fast direct memory lookups~\cite{drepper2007memory}.
+    \item \textbf{Thread-to-Core Binding (CPU Affinity)}: To stabilize execution latency measurements, we pin the benchmarking thread to a dedicated physical CPU core, preventing OS scheduler migration and L1/L2 cache invalidations~\cite{ribeiro2008memory}.
 
     \item \textbf{Fast Partial-State Reinitialization}: We clear search state markers in $O(\text{active})$ time using a visited stack, bypassing $O(V)$ re-initialization sweeps on localized queries.
 \end{itemize}
 
 \subsection{Precomputation and Landmarked Pre-Baked Data}
-To support fast ALT queries, we perform offline precomputation of landmark distances. Our preprocessing pipeline implements a three-level data flow. First, raw road geometries are compiled into an Edge-Based Graph representation, modeling turn penalties statically as edge weights. Second, the landmark selection routine generates 128 candidate landmarks using MinMax (Farthest) and Avoid heuristics. We then select exactly sixteen landmarks from this candidate set using the MaxCover stochastic optimization algorithm \cite{fuchs2010preprocessing}.
+To support fast ALT queries, we perform offline precomputation of landmark distances. Our preprocessing pipeline implements a three-level data flow. First, raw road geometries are compiled into an Edge-Based Graph representation, modeling turn penalties statically as edge weights. Second, the landmark selection routine generates 128 candidate landmarks using MinMax (Farthest) and Avoid heuristics. We then select exactly sixteen landmarks from this candidate set using the MaxCover stochastic optimization algorithm~\cite{fuchs2010preprocessing}.
 Third, we compute the shortest-path distance vectors from all landmarks to every node using Dijkstra searches. These precomputed distance matrices are stored as flat contiguous tables in memory. At query time, the ALT heuristic evaluation reads all sixteen precomputed 32-bit bounds in a single 64-byte L1 cache transaction, guaranteeing zero cache miss penalty in the routing hot loop.

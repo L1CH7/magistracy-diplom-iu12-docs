@@ -1,8 +1,13 @@
-\documentclass[10pt,journal,compsoc,compsocconf]{IEEEtran}
+\documentclass[10pt,journal,compsoc]{IEEEtran}
 \IEEEoverridecommandlockouts
 
-\usepackage{cite}
+\ifCLASSOPTIONcompsoc
+  \usepackage[nocompress]{cite}
+\else
+  \usepackage{cite}
+\fi
 \usepackage{amsmath,amssymb,amsfonts}
+\interdisplaylinepenalty=2500
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
@@ -32,7 +37,7 @@
 We evaluate seventy-seven priority queue and algorithm configuration variants on a scale-free graph of the Moscow metropolitan subgraph containing 582 thousand nodes and 1.46 million directed edges. 
 Our study reveals microarchitectural isomorphism, where priority queue memory layout scales step execution latency but leaves macro-topological search space complexity exponents unchanged. 
 We construct a three-step filtering pipeline to identify optimal routing configurations based on complexity exponents, node re-opening metrics, and tail latency stability. 
-Our benchmarks demonstrate that SimdRadixHeap is the optimal priority queue backend for monotone ALT queries, delivering 3147 QPS for localized queries and 631 QPS for megalopolis journeys. 
+Our benchmarks demonstrate that SimdRadixHeap is the optimal priority queue backend for monotone ALT queries, delivering 3,147~QPS for localized queries and 631~QPS for megalopolis journeys. 
 For non-monotone queries, we recommend our vectorized cache-conscious Simd8AryHeap.
 \end{abstract}
 
