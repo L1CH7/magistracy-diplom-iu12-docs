@@ -1,0 +1,24 @@
+\section{Related Work}
+\label{sec:related}
+
+Shortest path routing literature covers static precomputation and dynamic query-time acceleration. 
+Static methods, including Contraction Hierarchies, achieve sub-millisecond query times by adding shortcut edges to the graph. 
+These methods require a static network topology. 
+Dynamic environments with real-time congestion updates render static shortcut validation obsolete. 
+
+Algorithmic query-time acceleration methods restrict the explored search space. 
+The A* search uses Euclidean distance heuristics to guide the search toward the destination. 
+Goldberg and Harrelson \cite{goldberg2004alt} present the ALT algorithm, which leverages landmark nodes and the triangle inequality to construct tighter lower bounds. 
+Landmark selection algorithms, studied by Fuchs \cite{fuchs2010preprocessing}, determine lower bound quality and search space reduction. 
+
+Priority queue selection dictates the step latency constant $t_{\text{iter}}$. 
+Cherkassky et al. \cite{cherkassky1994shortest} evaluate priority queues on sparse networks. 
+Their experiments show that Fibonacci heaps suffer from high constant factors and poor cache locality. 
+Simple binary heaps outperform Fibonacci heaps on real-world graphs. 
+Ahuja et al. \cite{ahuja1990faster} introduce radix heaps to exploit integer edge weights, bounds, and monotonicity. 
+Radix heaps achieve near-constant time complexities by grouping keys into dynamic buckets. 
+
+Arthur et al. \cite{quickheap_arxiv} propose QuickHeap to minimize element comparison counts through lazy sorting and deferred element positioning. 
+While QuickHeap exhibits strong theoretical bounds, the lazy deferral mechanism introduces branch instruction overhead. 
+We examine how these instruction-level overheads degrade CPU performance on metropolitan road networks. 
+We contrast these priority queues against our cache-conscious SIMD $d$-ary heap layout.

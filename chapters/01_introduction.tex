@@ -1,0 +1,30 @@
+\section{Introduction}
+\label{sec:intro}
+
+Autonomous logistics, ride-hailing services, and smart city control loops demand real-time routing engines to process thousands of queries per second on scale-free road networks. 
+Dynamic urban environments exhibit frequent congestion spikes, traffic accidents, and road closures. 
+These dynamic updates render static pathfinding acceleration techniques, such as Contraction Hierarchies, impractical. 
+Updating shortcut structures across continental or metropolitan scale-free graphs requires expensive precomputation runs. 
+This cost prevents engines from incorporating real-time traffic updates. 
+
+We model the total routing execution time $T$ as the product of the search iteration count $N_{\text{iter}}$ and the average step latency $t_{\text{iter}}$:
+\begin{equation}
+T = N_{\text{iter}} \cdot t_{\text{iter}}
+\label{eq:latency_model}
+\end{equation}
+The search paradigm (Dijkstra, A*, or ALT) determines the iteration count $N_{\text{iter}}$ by defining the relaxed search space envelope. 
+The priority queue implementation determines the step latency $t_{\text{iter}}$ through memory layout, branch prediction efficiency, and cache hierarchy access patterns. 
+Prior works focus on asymptotic complexity bounds. 
+We focus on the interaction between algorithmic search space restriction and low-level hardware execution strain.
+
+We evaluate seventy-two algorithm-queue combinations on an edge-based graph of the Moscow metropolitan area containing 1.2 million nodes and 2.8 million edges. 
+Our evaluation reveals a phenomenon we define as microarchitectural isomorphism. 
+While priority queues scale the step latency constant $t_{\text{iter}}$, they exert no influence on the macro-topological search space relaxation. 
+The complexity exponents $\alpha$ remain parallel across different heaps. 
+
+We propose a three-step filtering pipeline to identify the Pareto-optimal routing configurations. 
+First, we apply algorithmic filtering based on complexity exponents $\alpha$ to eliminate search paradigms with excessive exploration envelopes. 
+Second, we evaluate heuristics based on target accuracy and state re-opening metrics to filter out configurations with high ghost-node densities. 
+Third, we analyze microarchitectural strain (jitter, kurtosis, and roughness) to select hardware-stable queue layouts. 
+This filtering pipeline discards suboptimal combinations. 
+Our work identifies Radix Heap as the optimal priority queue for monotone ALT routing, and the SIMD 8-ary heap for weighted A* search.

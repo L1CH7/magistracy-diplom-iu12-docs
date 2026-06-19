@@ -1,0 +1,41 @@
+\section{High-Performance Implementation Details}
+\label{sec:implementation}
+
+We construct our single-threaded routing engine in C++ using data-oriented design principles to maximize hardware efficiency \cite{drepper2007memory}. 
+We pack the road network topology into a Compressed Sparse Row (CSR) layout. 
+To incorporate traffic turn restrictions without conditional jumps in the hot loop, we apply dual graph line inversion. 
+Road segments become nodes in our computational graph, and turns at intersections become edges. 
+This Edge-Based Graph representation maps turn penalties to static edge weights.
+
+We apply a topological node reordering scheme based on the Morton spatial curve (Z-curve) during graph compilation. 
+The reordering assigns adjacent memory addresses to spatial neighbors on the map. 
+This spatial locality allows the hardware prefetcher to load neighboring nodes into the L1/L2 caches before search access. 
+
+We represent the dynamic traffic states using an Array of Structures (AoS) format. 
+We align each segment state structure to 64-byte boundaries using the \verb|alignas(64)| directive. 
+This alignment prevents cache line splitting and guarantees that a single cache transaction retrieves the node state. 
+To eliminate floating-point division in the routing loop, we precompute a 32-bit multiplier ($K_{\text{magic}}$) for each segment. 
+The routing loop calculates link delays using fixed-point arithmetic, shifting the products right by 20 bits. 
+This compression reduces dynamic weight calculation cost to three CPU cycles.
+
+We implement a cache-conscious SIMD 8-ary priority heap to reduce tree traversal depth. 
+The 8-ary structure matches the CPU cache line size. 
+We vectorize the child node search step using AVX2 intrinsics. 
+The child search routine uses the \verb|_mm256_min_epu32| instruction to compare eight child keys as a vector within a 256-bit register. 
+This SIMD operation compares keys across register lanes on a single CPU core, eliminating branch instructions during the down-heap operation. 
+
+We apply joint word encoding to represent heap elements. 
+We pack the 32-bit distance key and the 32-bit node index into a single 64-bit unsigned integer. 
+This joint encoding allows the CPU to compare distance and index pairs in a single clock cycle. 
+This format also avoids pointer indirection. 
+
+We utilize Target Register Caching to optimize coordinate access during A* and ALT searches. 
+We load destination coordinates and landmark bounds into CPU registers before entering the main loop. 
+This step reduces register pressure and eliminates stack spill operations. 
+
+Metropolitan graphs containing 1.2 million nodes require rapid state cleanup between queries. 
+Re-initializing the distance tracking array requires $O(V)$ operations, which dominates execution time for localized queries. 
+We implement an $O(\text{active})$ partial fast-clearing mechanism. 
+We maintain a thread-local stack of visited node indices during traversal. 
+After a query terminates, we iterate over the active stack to reset the modified distance values to infinity. 
+This approach restricts cleanup costs to the size of the relaxed search space.

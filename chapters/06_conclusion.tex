@@ -1,0 +1,15 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We evaluate seventy-two algorithm-queue combinations on a metropolitan scale-free graph. 
+Our study establishes the presence of microarchitectural isomorphism. 
+Priority queue memory layout determines step latency but leaves topological search space exponents unchanged. 
+
+We recommend SimdRadixHeap for monotone ALT queries. 
+It achieves 3147 QPS for localized queries and 631 QPS for megalopolis routing. 
+For non-monotone search paradigms where integer sorting is not applicable, our cache-conscious Simd8AryHeap provides the best trade-off between throughput and latency stability. 
+
+Future research must address network non-stationarity under multi-agent path updates. 
+When thousands of routing agents recalculate paths in parallel using identical congestion data, they shift bottlenecks to alternative segments. 
+This redirection creates secondary congestion waves. 
+We plan to develop decentralized routing protocols to damp these oscillations in real-time navigation engines.

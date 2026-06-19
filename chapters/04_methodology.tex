@@ -1,0 +1,24 @@
+\section{Mathematical Evaluation Methodology}
+\label{sec:methodology}
+
+We evaluate our routing engine using three mathematical approaches: multivariate Ordinary Least Squares (OLS) regression, multi-factor Analysis of Variance (ANOVA), and K-Means clustering. 
+We execute 1500 random route queries across the Moscow metropolitan road network to collect performance metrics. 
+
+We apply multivariate OLS regression to isolate execution time components. 
+Our regression model estimates query latency $T_{\text{ms}}$ based on priority queue operation costs, relaxation steps, and cache miss rates. 
+The OLS model measures coefficients for each queue layout to quantify microarchitectural overheads. 
+
+We perform multi-factor ANOVA testing to establish the significance of priority queue selection on performance variance. 
+We track two factors: the search algorithm (Dijkstra, A*, or ALT) and the priority queue type. 
+ANOVA checks the hypothesis that queue selection exerts a uniform influence on execution latency across different routing paradigms. 
+We measure latency jitter using variance, skewness, and kurtosis to evaluate stability under OS scheduler noise.
+
+We classify the 1500 benchmark journeys using K-Means clustering to analyze scaling patterns. 
+The clustering algorithm leverages journey distance, edge count, and node exploration counts as features. 
+We identify three distinct routing profiles:
+\begin{itemize}
+\item \textbf{Localized Profile}: Journeys under 5 km. Graph traversal overhead is small. Initialization and stack cleanup costs dominate the execution profile.
+\item \textbf{Regional Profile}: Journeys between 5 and 25 km. Traversal cost and queue operations exhibit equal latency footprints. 
+\item \textbf{Megalopolis Profile}: Journeys exceeding 25 km. The priority queue hot loop determines the execution time. 
+\end{itemize}
+This classification allows us to observe how priority queue performance scales from local queries to long-distance paths.
