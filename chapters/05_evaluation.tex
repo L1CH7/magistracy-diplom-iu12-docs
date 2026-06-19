@@ -115,8 +115,9 @@ This variance in SimdBucketQueue arises from bucket-scan overhead on long paths,
 SimdQuickHeap records kurtosis 16.0 and roughness 9.1, elevated by branch mispredictions in its lazy sifting routine. 
 Figure~\ref{fig:roughness} shows Simd8AryHeap achieves the most stable profile: kurtosis 12.4 and roughness 8.5. 
 SimdRadixHeap records kurtosis 20.1 and roughness 9.0. 
-We eliminate SimdBucketQueue, SimdDeltaQueue, and SimdQuickHeap from the candidate set. 
-Both Simd8AryHeap and SimdRadixHeap qualify for final throughput evaluation.
+We eliminate SimdBucketQueue, SimdDeltaQueue, and SimdQuickHeap from the candidate set. Both Simd8AryHeap and SimdRadixHeap qualify for final throughput evaluation.
+
+This exact filtering process highlights a major methodological advancement over our previous simulation iterations. In our initial experiments, we relied on an approximate Delta-queue layout (with a coarse bucket width $\Delta$) to achieve rapid routing cycles, which came at the cost of a 1.29\% Mean Relative Error (MRE) in path stretch. By transitioning to a vectorized, exact 8-ary priority heap (\texttt{Simd8AryHeap}) with bit-packed coordinate-key fields, we successfully restore absolute path optimality (0\% stretch error) while matching or exceeding the query throughput of the approximate structure.
 
 \begin{figure}[t]
 \centering
