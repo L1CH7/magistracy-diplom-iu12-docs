@@ -19,7 +19,7 @@ plt.rcParams.update({
 })
 
 # Path constants
-RUN_RESULTS_CSV = "/home/lich/dev/bmstu/diplom-iu12/magistracy-diplom-iu12/benchmarks/traffic-core/stats/run_results.csv"
+RUN_RESULTS_CSV = "/home/lich/dev/bmstu/diplom-iu12/magistracy-diplom-iu12/docs/latex/assets/data/data-router-benchmark-run_results-16.05.26-02:00.csv"
 MT_RESULTS_CSV = "/home/lich/dev/bmstu/diplom-iu12/magistracy-diplom-iu12/benchmarks/traffic-core/stats/multithreading_results.csv"
 BPR_ON_CSV = "/home/lich/dev/bmstu/diplom-iu12/magistracy-diplom-iu12/scripts/stats/run_4f240105_bpr_on_prof_on_24b_300s_200000a_3asf.csv"
 BPR_OFF_CSV = "/home/lich/dev/bmstu/diplom-iu12/magistracy-diplom-iu12/scripts/stats/run_45b62f84_bpr_off_prof_on_24b_300s_200000a_3asf.csv"
@@ -113,14 +113,13 @@ def generate_alt_qps():
             alpha=0.95
         )
         
-    plt.title("Производительность поиска пути ALT в зависимости от длины маршрута", fontweight='bold', pad=12)
     plt.yscale('log')
-    plt.ylabel("Средняя производительность QPS (запросов/сек, лог. масштаб)", fontsize=11)
+    plt.ylabel("Средний QPS (запросов/сек, лог. масштаб)", fontsize=11)
     plt.xlabel("Сложность маршрута (число ребер пути)", fontsize=11)
     plt.grid(True, which="both", linestyle='--', alpha=0.5)
     plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0', loc='upper right')
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "alt_qps_comparison.png"), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "alt_qps_comparison.png"), bbox_inches='tight', pad_inches=0.02, dpi=300)
     plt.close()
 
 def generate_hardware_cycles():
@@ -149,13 +148,12 @@ def generate_hardware_cycles():
         linewidth=0.8
     )
     
-    plt.title("Аппаратная сложность: среднее число тактов CPU на операцию (Zen 3)", fontweight='bold', pad=12)
     plt.ylabel("Среднее число тактов CPU (меньше — лучше)", fontsize=11)
     plt.xlabel("Тип очереди приоритетов", fontsize=11)
     plt.grid(True, axis='y', linestyle='--', alpha=0.5)
     plt.legend(title="Операция", frameon=True, facecolor='white', edgecolor='#e0e0e0')
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "push_pop_cycles_comparison.png"), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "push_pop_cycles_comparison.png"), bbox_inches='tight', pad_inches=0.02, dpi=300)
     plt.close()
 
 def generate_multithreading_scalability():
@@ -199,14 +197,13 @@ def generate_multithreading_scalability():
             color='#D0021B' if mode == 'SMT-Affinity' else '#4A90E2'
         )
         
-    plt.title("Анализ многопоточной масштабируемости ядра (ALT + 8-ary)", fontweight='bold', pad=12)
     plt.xlabel("Число вычислительных потоков", fontsize=11)
     plt.ylabel("Пропускная способность (запросов в секунду, RPS)", fontsize=11)
     plt.xticks(thread_counts)
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0', loc='upper left')
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "multithreading_scalability.png"), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "multithreading_scalability.png"), bbox_inches='tight', pad_inches=0.02, dpi=300)
     plt.close()
 
 def generate_best_combinations():
@@ -280,9 +277,8 @@ def generate_best_combinations():
     handles = [item[1] for item in lines]
     labels = [item[2] for item in lines]
     
-    plt.title("Сравнение лучших комбинаций алгоритмов и очередей (QPS)", fontweight='bold', pad=15, fontsize=13)
     plt.yscale('log')
-    plt.ylabel("Средняя производительность QPS (запросов/сек, лог. масштаб)", fontsize=11)
+    plt.ylabel("QPS (запросов/с, лог. масштаб)", fontsize=11)
     plt.xlabel("Сложность маршрута (число ребер пути)", fontsize=11)
     plt.grid(True, which="both", linestyle='--', alpha=0.5)
     
@@ -291,10 +287,10 @@ def generate_best_combinations():
         title="Лучшие комбинации\n(Алгоритм + Очередь)",
         title_fontsize=9, fontsize=8.5,
         frameon=True, facecolor='white', edgecolor='#e0e0e0',
-        loc='upper left', bbox_to_anchor=(1.01, 1.0)
+        loc='upper right'
     )
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "best_combinations_comparison.png"), bbox_inches='tight', dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "best_combinations_comparison.png"), bbox_inches='tight', pad_inches=0.02, dpi=300)
     plt.close()
 
 def generate_queue_overhead_trend():
@@ -329,13 +325,12 @@ def generate_queue_overhead_trend():
             fontweight='bold', fontsize=9, color='#333333'
         )
         
-    plt.title("Доля времени на операции с очередью приоритетов (меньше — лучше)", fontweight='bold', pad=12, fontsize=12)
     plt.ylabel("Доля времени выполнения (%)", fontsize=11)
     plt.xlabel("Тип очереди приоритетов", fontsize=11)
     plt.ylim(0, max(agg['QueueOverheadPct']) + 12)
     plt.grid(True, axis='y', linestyle='--', alpha=0.5)
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "queue_overhead_trend.png"), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "queue_overhead_trend.png"), bbox_inches='tight', pad_inches=0.02, dpi=300)
     plt.close()
 
 def generate_accuracy_comparison():
@@ -389,19 +384,19 @@ def generate_accuracy_comparison():
                 alpha=0.95
             )
             
-        ax.set_title(f"Алгоритм: {algo}", fontweight='bold', pad=10)
-        ax.set_ylabel("Средняя относительная погрешность (%)")
-        ax.set_xlabel("Сложность маршрута (число ребер пути)")
+        ax.set_title(algo, fontweight='bold', pad=10, fontsize=16)
+        ax.set_ylabel("Относительная погрешность (%)", fontsize=16)
+        ax.set_xlabel("Сложность маршрута (число ребер пути)", fontsize=16)
+        ax.tick_params(axis='both', which='major', labelsize=16)
         ax.grid(True, which="both", linestyle='--', alpha=0.5)
         
         if idx == 0:
-            ax.legend(title="Типы очередей", frameon=True, shadow=False, facecolor='white', edgecolor='#e0e0e0', loc='upper left')
+            ax.legend(title="Типы очередей", frameon=True, shadow=False, facecolor='white', edgecolor='#e0e0e0', loc='upper right', fontsize=16, title_fontsize=16)
             
-    plt.suptitle("Точность поиска пути (относительная погрешность в %) в зависимости от длины маршрута", fontweight='bold', y=0.98, fontsize=16)
     plt.tight_layout()
     
     # Save directly as accuracy_comparison-4-algos.png
-    plt.savefig(os.path.join(OUTPUT_DIR, "accuracy_comparison-4-algos.png"), bbox_inches='tight', dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "accuracy_comparison-4-algos.png"), bbox_inches='tight', pad_inches=0.02, dpi=300)
     plt.close()
 
 def generate_simulation_comparisons():
@@ -421,13 +416,12 @@ def generate_simulation_comparisons():
     plt.plot(df_off['SimTime'], df_off['TTI'], color=COLORS['bpr_off'], linewidth=2.2, label='Без BPR-регулирования (UE)')
     plt.axhline(1.0, color='gray', linestyle='-.', linewidth=0.8, alpha=0.7, label='Свободный поток (TTI = 1.0)')
     
-    plt.title("Динамика индекса задержки сети TTI в пиковые периоды", fontweight='bold', pad=12)
     plt.xlabel("Время симуляции (секунды)", fontsize=11)
-    plt.ylabel("Коэффициент TTI (отношение реального времени к свободному)", fontsize=11)
+    plt.ylabel("Коэффициент TTI (отношение к свободному потоку)", fontsize=11)
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0', loc='upper left')
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "simulation_tti_comparison.png"), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "simulation_tti_comparison.png"), bbox_inches='tight', pad_inches=0.02, dpi=300)
     plt.close()
     
     # 2. Completed trips
@@ -438,13 +432,12 @@ def generate_simulation_comparisons():
     plt.plot(df_on['SimTime'], df_on['CompletedTrips'] - on_start_trips, color=COLORS['bpr_on'], linewidth=2.2, label='С BPR-регулированием (SO)')
     plt.plot(df_off['SimTime'], df_off['CompletedTrips'] - off_start_trips, color=COLORS['bpr_off'], linewidth=2.2, label='Без BPR-регулирования (UE)')
     
-    plt.title("Накопленное количество завершенных поездок с начала затора", fontweight='bold', pad=12)
     plt.xlabel("Время симуляции (секунды)", fontsize=11)
     plt.ylabel("Количество завершенных поездок (автомобили)", fontsize=11)
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0', loc='upper left')
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "simulation_completed_comparison.png"), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "simulation_completed_comparison.png"), bbox_inches='tight', pad_inches=0.02, dpi=300)
     plt.close()
     
     # 3. MPR Queue
@@ -452,13 +445,12 @@ def generate_simulation_comparisons():
     plt.plot(df_on['SimTime'], df_on['WaitingReroute'], color=COLORS['bpr_on'], linewidth=2.2, label='С BPR-регулированием (SO)')
     plt.plot(df_off['SimTime'], df_off['WaitingReroute'], color=COLORS['bpr_off'], linewidth=2.2, label='Без BPR-регулирования (UE)')
     
-    plt.title("Размер очереди динамического перестроения маршрутов (MPR)", fontweight='bold', pad=12)
     plt.xlabel("Время симуляции (секунды)", fontsize=11)
     plt.ylabel("Количество ТС в очереди на перерасчет (ед.)", fontsize=11)
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0', loc='upper left')
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "simulation_queue_comparison.png"), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "simulation_queue_comparison.png"), bbox_inches='tight', pad_inches=0.02, dpi=300)
     plt.close()
 
 def main():
