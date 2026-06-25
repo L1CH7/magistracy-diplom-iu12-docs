@@ -7,25 +7,29 @@ import seaborn as sns
 
 # Set premium academic style (300 DPI for publication quality)
 plt.style.use('seaborn-v0_8-whitegrid')
-sns.set_theme(style="ticks")
 
-def apply_font_sizes(fig_width, fig_height=5.5, nrows=1, ncols=1):
+# Global style and sizing constants
+DEFAULT_FIG_WIDTH = 8.0
+DEFAULT_FIG_HEIGHT = 5.0
+BASE_AXES_LABEL_SIZE = 12
+
+def apply_font_sizes(fig_width, fig_height=DEFAULT_FIG_HEIGHT, nrows=1, ncols=1):
     """
     Глобально настраивает размеры шрифтов matplotlib в зависимости от размеров рисунка и сетки подграфиков.
     """
-    scale = fig_width / 9.0
+    scale = fig_width / DEFAULT_FIG_WIDTH
     if ncols > 1 or nrows > 1:
         # Для многопанельных рисунков делаем шрифт компактнее
-        scale *= 0.75
+        scale *= 0.85
         
-    axes_label_size = int(round(12 * scale))
+    axes_label_size = int(round(BASE_AXES_LABEL_SIZE * scale))
     plt.rcParams.update({
         'font.family': 'sans-serif',
         'font.size': axes_label_size - 1,
         'axes.labelsize': axes_label_size,
-        'axes.titlesize': int(round(13 * scale)),
-        'xtick.labelsize': axes_label_size - 1,
-        'ytick.labelsize': axes_label_size - 1,
+        'axes.titlesize': int(round((BASE_AXES_LABEL_SIZE + 1) * scale)),
+        'xtick.labelsize': axes_label_size - 2,
+        'ytick.labelsize': axes_label_size - 2,
         'legend.fontsize': axes_label_size,
         'legend.title_fontsize': axes_label_size,
         'figure.dpi': 300,
@@ -85,7 +89,7 @@ COMBO_STYLES = {
 
 def generate_alt_qps():
     print("📈 Plotting ALT QPS vs Complexity...")
-    apply_font_sizes(9.0, 5.5)
+    apply_font_sizes(DEFAULT_FIG_WIDTH, DEFAULT_FIG_HEIGHT)
     df = pd.read_csv(RUN_RESULTS_CSV)
     df = df[df['Queue'] != '8-ary-lazy'].copy()
     df = df[(df['Crashed'] == 0) & (df['Algorithm'] == 'ALT')].copy()
@@ -135,7 +139,7 @@ def generate_alt_qps():
 
 def generate_hardware_cycles():
     print("📈 Plotting Hardware Cycles Comparison...")
-    apply_font_sizes(9.0, 5.5)
+    apply_font_sizes(DEFAULT_FIG_WIDTH, DEFAULT_FIG_HEIGHT)
     df = pd.read_csv(RUN_RESULTS_CSV)
     df = df[df['Crashed'] == 0]
     
@@ -170,7 +174,7 @@ def generate_hardware_cycles():
 
 def generate_multithreading_scalability():
     print("📈 Plotting Multithreading Scalability...")
-    apply_font_sizes(9.0, 5.5)
+    apply_font_sizes(DEFAULT_FIG_WIDTH, DEFAULT_FIG_HEIGHT)
     df = pd.read_csv(MT_RESULTS_CSV)
     df = df[df['Mode'] != 'No-SMT-Affinity'].copy()
     
@@ -221,7 +225,7 @@ def generate_multithreading_scalability():
 
 def generate_best_combinations():
     print("📈 Plotting Ultimate Best Combinations Showdown with markers...")
-    apply_font_sizes(11.5, 5.5)
+    apply_font_sizes(DEFAULT_FIG_WIDTH, DEFAULT_FIG_HEIGHT)
     df = pd.read_csv(RUN_RESULTS_CSV)
     df = df[df['Queue'] != '8-ary-lazy'].copy()
     df = df[df['Crashed'] == 0].copy()
@@ -299,7 +303,6 @@ def generate_best_combinations():
     
     plt.legend(
         handles, labels,
-        title="Лучшие комбинации\n(Алгоритм + Очередь)",
         frameon=True, facecolor='white', edgecolor='#e0e0e0',
         loc='upper right'
     )
@@ -309,7 +312,7 @@ def generate_best_combinations():
 
 def generate_queue_overhead_trend():
     print("📈 Plotting Queue Overhead Trend Bar Chart...")
-    apply_font_sizes(9.0, 5.5)
+    apply_font_sizes(DEFAULT_FIG_WIDTH, DEFAULT_FIG_HEIGHT)
     df = pd.read_csv(RUN_RESULTS_CSV)
     df = df[df['Queue'] != '8-ary-lazy'].copy()
     df = df[df['Crashed'] == 0].copy()
@@ -350,7 +353,7 @@ def generate_queue_overhead_trend():
 
 def generate_accuracy_comparison():
     print("📈 Plotting 2x2 Accuracy Comparison (4 Algos) Chart...")
-    apply_font_sizes(15.0, 12.0, nrows=2, ncols=2)
+    apply_font_sizes(14.0, 11.0, nrows=2, ncols=2)
     df = pd.read_csv(RUN_RESULTS_CSV)
     df = df[df['Queue'] != '8-ary-lazy'].copy()
     df = df[df['Crashed'] == 0].copy()
@@ -407,7 +410,7 @@ def generate_accuracy_comparison():
         ax.grid(True, which="both", linestyle='--', alpha=0.5)
         
         if idx == 0:
-            ax.legend(title="Типы очередей", frameon=True, shadow=False, facecolor='white', edgecolor='#e0e0e0', loc='upper right')
+            ax.legend(frameon=True, shadow=False, facecolor='white', edgecolor='#e0e0e0', loc='upper right')
             
     plt.tight_layout()
     
@@ -417,7 +420,7 @@ def generate_accuracy_comparison():
 
 def generate_simulation_plots():
     print(f"📈 Plotting Simulation Metrics from CSV: {SIMULATION_CSV}")
-    apply_font_sizes(9.0, 5.5)
+    apply_font_sizes(DEFAULT_FIG_WIDTH, DEFAULT_FIG_HEIGHT)
     df = pd.read_csv(SIMULATION_CSV)
     time = df['SimTime']
     
