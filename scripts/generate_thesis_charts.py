@@ -8,21 +8,34 @@ import seaborn as sns
 # Set premium academic style (300 DPI for publication quality)
 plt.style.use('seaborn-v0_8-whitegrid')
 sns.set_theme(style="ticks")
-plt.rcParams.update({
-    'font.family': 'sans-serif',
-    'font.size': 11,
-    'axes.labelsize': 12,
-    'axes.titlesize': 13,
-    'xtick.labelsize': 10,
-    'ytick.labelsize': 10,
-    'figure.dpi': 300
-})
+
+def apply_font_sizes(fig_width, fig_height=5.5, nrows=1, ncols=1):
+    """
+    Глобально настраивает размеры шрифтов matplotlib в зависимости от размеров рисунка и сетки подграфиков.
+    """
+    scale = fig_width / 9.0
+    if ncols > 1 or nrows > 1:
+        # Для многопанельных рисунков делаем шрифт компактнее
+        scale *= 0.75
+        
+    axes_label_size = int(round(12 * scale))
+    plt.rcParams.update({
+        'font.family': 'sans-serif',
+        'font.size': axes_label_size - 1,
+        'axes.labelsize': axes_label_size,
+        'axes.titlesize': int(round(13 * scale)),
+        'xtick.labelsize': axes_label_size - 1,
+        'ytick.labelsize': axes_label_size - 1,
+        'legend.fontsize': axes_label_size,
+        'legend.title_fontsize': axes_label_size,
+        'figure.dpi': 300,
+        'figure.figsize': (fig_width, fig_height)
+    })
 
 # Path constants
 RUN_RESULTS_CSV = "/home/lich/dev/bmstu/diplom-iu12/magistracy-diplom-iu12/docs/latex/assets/data/data-router-benchmark-run_results-16.05.26-02:00.csv"
-MT_RESULTS_CSV = "/home/lich/dev/bmstu/diplom-iu12/magistracy-diplom-iu12/benchmarks/traffic-core/stats/multithreading_results.csv"
-BPR_ON_CSV = "/home/lich/dev/bmstu/diplom-iu12/magistracy-diplom-iu12/scripts/stats/run_4f240105_bpr_on_prof_on_24b_300s_200000a_3asf.csv"
-BPR_OFF_CSV = "/home/lich/dev/bmstu/diplom-iu12/magistracy-diplom-iu12/scripts/stats/run_45b62f84_bpr_off_prof_on_24b_300s_200000a_3asf.csv"
+MT_RESULTS_CSV = "/home/lich/dev/bmstu/diplom-iu12/magistracy-diplom-iu12/docs/latex/assets/data/data-router-benchmark-multithreading_results.csv"
+SIMULATION_CSV = "/home/lich/dev/bmstu/diplom-iu12/magistracy-diplom-iu12/docs/latex/assets/data/data-simulation-run_02bca76a_bpr_on_prof_on_24b_300s_0a_1asf.csv"
 OUTPUT_DIR = "/home/lich/dev/bmstu/diplom-iu12/magistracy-diplom-iu12/docs/latex/assets/images"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -35,9 +48,7 @@ COLORS = {
     '16-ary': '#F5A623',
     'bucket': '#9013FE',
     'radix': '#7ED321',
-    'delta': '#BD10E0',
-    'bpr_on': '#1f77b4',
-    'bpr_off': '#d62728'
+    'delta': '#BD10E0'
 }
 
 LINE_STYLES = {
@@ -74,6 +85,7 @@ COMBO_STYLES = {
 
 def generate_alt_qps():
     print("📈 Plotting ALT QPS vs Complexity...")
+    apply_font_sizes(9.0, 5.5)
     df = pd.read_csv(RUN_RESULTS_CSV)
     df = df[df['Queue'] != '8-ary-lazy'].copy()
     df = df[(df['Crashed'] == 0) & (df['Algorithm'] == 'ALT')].copy()
@@ -91,10 +103,9 @@ def generate_alt_qps():
     
     agg = df.groupby(['Queue', 'PathEdgesAvg'], observed=False)['TimeMs'].mean().reset_index()
     agg['QPS'] = 1000.0 / agg['TimeMs']
-    
-    plt.figure(figsize=(9, 5.5))
     x_values = sorted(list(bucket_means.values))
     
+    plt.figure()
     for queue_name in ['2-ary', '4-ary', '8-ary', '16-ary', 'bucket', 'radix', 'delta']:
         queue_data = agg[agg['Queue'] == queue_name]
         if queue_data.empty:
@@ -114,8 +125,8 @@ def generate_alt_qps():
         )
         
     plt.yscale('log')
-    plt.ylabel("Средний QPS (запросов/сек, лог. масштаб)", fontsize=11)
-    plt.xlabel("Сложность маршрута (число ребер пути)", fontsize=11)
+    plt.ylabel("QPS (запросов/с, лог. масштаб)")
+    plt.xlabel("Сложность маршрута (число ребер пути)")
     plt.grid(True, which="both", linestyle='--', alpha=0.5)
     plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0', loc='upper right')
     plt.tight_layout()
@@ -124,6 +135,7 @@ def generate_alt_qps():
 
 def generate_hardware_cycles():
     print("📈 Plotting Hardware Cycles Comparison...")
+    apply_font_sizes(9.0, 5.5)
     df = pd.read_csv(RUN_RESULTS_CSV)
     df = df[df['Crashed'] == 0]
     
@@ -134,22 +146,22 @@ def generate_hardware_cycles():
     agg = agg.set_index('Queue').reindex(target_queues).reset_index()
     
     melted = pd.melt(agg, id_vars=['Queue'], value_vars=['AvgPushCycles', 'AvgPopCycles'],
-                     var_name='Operation', value_name='CpuCycles')
+                      var_name='Operation', value_name='CpuCycles')
     melted['Operation'] = melted['Operation'].map({'AvgPushCycles': 'Вставка (Push)', 'AvgPopCycles': 'Извлечение (Pop)'})
     
-    plt.figure(figsize=(9, 5.5))
+    plt.figure()
     sns.barplot(
         data=melted,
         x='Queue',
         y='CpuCycles',
         hue='Operation',
-        palette={'Вставка (Push)': '#4A90E2', 'Извлечение (Pop)': '#D0021B'},
+        palette=['#4A90E2', '#D0021B'],
         edgecolor='black',
         linewidth=0.8
     )
     
-    plt.ylabel("Среднее число тактов CPU (меньше — лучше)", fontsize=11)
-    plt.xlabel("Тип очереди приоритетов", fontsize=11)
+    plt.ylabel("Среднее число тактов CPU (меньше — лучше)")
+    plt.xlabel("Тип очереди приоритетов")
     plt.grid(True, axis='y', linestyle='--', alpha=0.5)
     plt.legend(title="Операция", frameon=True, facecolor='white', edgecolor='#e0e0e0')
     plt.tight_layout()
@@ -158,10 +170,11 @@ def generate_hardware_cycles():
 
 def generate_multithreading_scalability():
     print("📈 Plotting Multithreading Scalability...")
+    apply_font_sizes(9.0, 5.5)
     df = pd.read_csv(MT_RESULTS_CSV)
     df = df[df['Mode'] != 'No-SMT-Affinity'].copy()
     
-    plt.figure(figsize=(9, 5.5))
+    plt.figure()
     
     # Calculate Ideal Linear Limit
     baseline_row = df[(df['Mode'] == 'SMT-Affinity') & (df['ThreadCount'] == 1)]
@@ -197,8 +210,8 @@ def generate_multithreading_scalability():
             color='#D0021B' if mode == 'SMT-Affinity' else '#4A90E2'
         )
         
-    plt.xlabel("Число вычислительных потоков", fontsize=11)
-    plt.ylabel("Пропускная способность (запросов в секунду, RPS)", fontsize=11)
+    plt.xlabel("Число вычислительных потоков")
+    plt.ylabel("Пропускная способность (запросов в секунду, RPS)")
     plt.xticks(thread_counts)
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0', loc='upper left')
@@ -208,6 +221,7 @@ def generate_multithreading_scalability():
 
 def generate_best_combinations():
     print("📈 Plotting Ultimate Best Combinations Showdown with markers...")
+    apply_font_sizes(11.5, 5.5)
     df = pd.read_csv(RUN_RESULTS_CSV)
     df = df[df['Queue'] != '8-ary-lazy'].copy()
     df = df[df['Crashed'] == 0].copy()
@@ -246,10 +260,13 @@ def generate_best_combinations():
     agg['QPS'] = 1000.0 / agg['TimeMs']
     agg['Combo'] = agg['Algorithm'].astype(str) + " + " + agg['Queue'].astype(str)
     
-    plt.figure(figsize=(11.5, 7))
-    
+    plt.figure()
     lines = []
+    
     for combo in combo_names:
+        parts = combo.split(' + ')
+        algo, queue = parts[0], parts[1]
+        
         combo_data = agg[agg['Combo'] == combo]
         if combo_data.empty:
             continue
@@ -257,9 +274,7 @@ def generate_best_combinations():
         
         valid_qps = combo_data['QPS'].dropna()
         last_qps = valid_qps.iloc[-1] if not valid_qps.empty else 0.0
-        
-        # Consistent style lookup from our custom combo style map
-        style_cfg = COMBO_STYLES.get(combo, {'color': '#000000', 'linestyle': '-', 'marker': 'o', 'linewidth': 1.8})
+        style_cfg = COMBO_STYLES.get(combo, {'color': '#333333', 'linestyle': '-', 'marker': 'o', 'linewidth': 1.5})
         
         line, = plt.plot(
             combo_data['PathEdgesAvg'],
@@ -278,14 +293,13 @@ def generate_best_combinations():
     labels = [item[2] for item in lines]
     
     plt.yscale('log')
-    plt.ylabel("QPS (запросов/с, лог. масштаб)", fontsize=11)
-    plt.xlabel("Сложность маршрута (число ребер пути)", fontsize=11)
+    plt.ylabel("QPS (запросов/с, лог. масштаб)")
+    plt.xlabel("Сложность маршрута (число ребер пути)")
     plt.grid(True, which="both", linestyle='--', alpha=0.5)
     
     plt.legend(
         handles, labels,
         title="Лучшие комбинации\n(Алгоритм + Очередь)",
-        title_fontsize=9, fontsize=8.5,
         frameon=True, facecolor='white', edgecolor='#e0e0e0',
         loc='upper right'
     )
@@ -295,6 +309,7 @@ def generate_best_combinations():
 
 def generate_queue_overhead_trend():
     print("📈 Plotting Queue Overhead Trend Bar Chart...")
+    apply_font_sizes(9.0, 5.5)
     df = pd.read_csv(RUN_RESULTS_CSV)
     df = df[df['Queue'] != '8-ary-lazy'].copy()
     df = df[df['Crashed'] == 0].copy()
@@ -305,7 +320,7 @@ def generate_queue_overhead_trend():
     agg = df.groupby('Queue', observed=False)['QueueOverheadPct'].mean().reset_index()
     agg = agg.sort_values(by='QueueOverheadPct', ascending=False)
     
-    plt.figure(figsize=(9, 5.5))
+    plt.figure()
     bars = plt.bar(
         agg['Queue'],
         agg['QueueOverheadPct'],
@@ -325,8 +340,8 @@ def generate_queue_overhead_trend():
             fontweight='bold', fontsize=9, color='#333333'
         )
         
-    plt.ylabel("Доля времени выполнения (%)", fontsize=11)
-    plt.xlabel("Тип очереди приоритетов", fontsize=11)
+    plt.ylabel("Доля времени выполнения (%)")
+    plt.xlabel("Тип очереди приоритетов")
     plt.ylim(0, max(agg['QueueOverheadPct']) + 12)
     plt.grid(True, axis='y', linestyle='--', alpha=0.5)
     plt.tight_layout()
@@ -335,6 +350,7 @@ def generate_queue_overhead_trend():
 
 def generate_accuracy_comparison():
     print("📈 Plotting 2x2 Accuracy Comparison (4 Algos) Chart...")
+    apply_font_sizes(15.0, 12.0, nrows=2, ncols=2)
     df = pd.read_csv(RUN_RESULTS_CSV)
     df = df[df['Queue'] != '8-ary-lazy'].copy()
     df = df[df['Crashed'] == 0].copy()
@@ -343,6 +359,7 @@ def generate_accuracy_comparison():
         print("⚠️ Skipping Accuracy Chart: RelativeErrorPct not in CSV")
         return
         
+    # Request-based binning
     route_edges = df.groupby('RouteID')['PathEdges'].mean().reset_index()
     try:
         route_edges['Bucket'] = pd.qcut(route_edges['PathEdges'], q=10, labels=False, duplicates='drop')
@@ -358,7 +375,7 @@ def generate_accuracy_comparison():
     
     # Grid 2x2: A-Star, ALT, Bi-Dijkstra, Dijkstra
     algorithms = ['A-Star', 'ALT', 'Bi-Dijkstra', 'Dijkstra']
-    fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+    fig, axes = plt.subplots(2, 2)
     axes = axes.flatten()
     
     for idx, algo in enumerate(algorithms):
@@ -384,14 +401,13 @@ def generate_accuracy_comparison():
                 alpha=0.95
             )
             
-        ax.set_title(algo, fontweight='bold', pad=10, fontsize=16)
-        ax.set_ylabel("Относительная погрешность (%)", fontsize=16)
-        ax.set_xlabel("Сложность маршрута (число ребер пути)", fontsize=16)
-        ax.tick_params(axis='both', which='major', labelsize=16)
+        ax.set_title(algo, fontweight='bold', pad=10)
+        ax.set_ylabel("Относительная погрешность (%)")
+        ax.set_xlabel("Сложность маршрута (число ребер пути)")
         ax.grid(True, which="both", linestyle='--', alpha=0.5)
         
         if idx == 0:
-            ax.legend(title="Типы очередей", frameon=True, shadow=False, facecolor='white', edgecolor='#e0e0e0', loc='upper right', fontsize=16, title_fontsize=16)
+            ax.legend(title="Типы очередей", frameon=True, shadow=False, facecolor='white', edgecolor='#e0e0e0', loc='upper right')
             
     plt.tight_layout()
     
@@ -399,69 +415,103 @@ def generate_accuracy_comparison():
     plt.savefig(os.path.join(OUTPUT_DIR, "accuracy_comparison-4-algos.png"), bbox_inches='tight', pad_inches=0.02, dpi=300)
     plt.close()
 
-def generate_simulation_comparisons():
-    print("📈 Plotting Simulation Comparisons (Strict Overlap)...")
-    data_on = pd.read_csv(BPR_ON_CSV)
-    data_off = pd.read_csv(BPR_OFF_CSV)
+def generate_simulation_plots():
+    print(f"📈 Plotting Simulation Metrics from CSV: {SIMULATION_CSV}")
+    apply_font_sizes(9.0, 5.5)
+    df = pd.read_csv(SIMULATION_CSV)
+    time = df['SimTime']
     
-    t_start = max(data_on['SimTime'].min(), data_off['SimTime'].min())
-    t_end = min(data_on['SimTime'].max(), data_off['SimTime'].max())
-    
-    df_on = data_on[(data_on['SimTime'] >= t_start) & (data_on['SimTime'] <= t_end)].sort_values('SimTime').copy()
-    df_off = data_off[(data_off['SimTime'] >= t_start) & (data_off['SimTime'] <= t_end)].sort_values('SimTime').copy()
-    
-    # 1. TTI
-    plt.figure(figsize=(9, 5.2))
-    plt.plot(df_on['SimTime'], df_on['TTI'], color=COLORS['bpr_on'], linewidth=2.2, label='С BPR-регулированием (SO)')
-    plt.plot(df_off['SimTime'], df_off['TTI'], color=COLORS['bpr_off'], linewidth=2.2, label='Без BPR-регулирования (UE)')
-    plt.axhline(1.0, color='gray', linestyle='-.', linewidth=0.8, alpha=0.7, label='Свободный поток (TTI = 1.0)')
-    
-    plt.xlabel("Время симуляции (секунды)", fontsize=11)
-    plt.ylabel("Коэффициент TTI (отношение к свободному потоку)", fontsize=11)
-    plt.grid(True, linestyle='--', alpha=0.5)
-    plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0', loc='upper left')
+    # 1. Green Zones (Свободные участки)
+    plt.figure()
+    plt.plot(time, df['GreenZones'], color='#2ca02c', linewidth=2.0, 
+             label=r'Свободные участки: $N < C_{vis} + 0.3(C_{jam} - C_{vis})$')
+    plt.xlabel("Время симуляции (с)")
+    plt.ylabel("Количество ребер")
+    plt.grid(True, linestyle=':', alpha=0.6)
+    plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0', loc='upper right')
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "simulation_tti_comparison.png"), bbox_inches='tight', pad_inches=0.02, dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "fig_green_zones.png"), bbox_inches='tight', pad_inches=0.02)
     plt.close()
+
+    # 2. Yellow, Red, and Black Zones Combined (Загруженные, перегруженные и заторные участки)
+    plt.figure()
+    plt.plot(time, df['BlackZones'], color='#111111', linewidth=2.0, 
+             label=r'Критические заторы: $N \geq 1.5 C_{jam}$', zorder=1)
+    plt.plot(time, df['RedZones'], color='#d62728', linewidth=1.5, 
+             label=r'Перегрузка: $C_{jam} \leq N < 1.5 C_{jam}$', zorder=2)
+    plt.plot(time, df['YellowZones'], color='#bcbd22', linewidth=1.5, 
+             label=r'Плотный трафик: $C_{vis} + 0.3(C_{jam} - C_{vis}) \leq N < C_{jam}$', zorder=3)
     
-    # 2. Completed trips
-    on_start_trips = df_on['CompletedTrips'].iloc[0]
-    off_start_trips = df_off['CompletedTrips'].iloc[0]
-    
-    plt.figure(figsize=(9, 5.2))
-    plt.plot(df_on['SimTime'], df_on['CompletedTrips'] - on_start_trips, color=COLORS['bpr_on'], linewidth=2.2, label='С BPR-регулированием (SO)')
-    plt.plot(df_off['SimTime'], df_off['CompletedTrips'] - off_start_trips, color=COLORS['bpr_off'], linewidth=2.2, label='Без BPR-регулирования (UE)')
-    
-    plt.xlabel("Время симуляции (секунды)", fontsize=11)
-    plt.ylabel("Количество завершенных поездок (автомобили)", fontsize=11)
-    plt.grid(True, linestyle='--', alpha=0.5)
-    plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0', loc='upper left')
+    plt.xlabel("Время симуляции (с)")
+    plt.ylabel("Количество ребер")
+    plt.grid(True, linestyle=':', alpha=0.6)
+    plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0', loc='upper right')
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "simulation_completed_comparison.png"), bbox_inches='tight', pad_inches=0.02, dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "fig_red_yellow_zones.png"), bbox_inches='tight', pad_inches=0.02)
     plt.close()
-    
-    # 3. MPR Queue
-    plt.figure(figsize=(9, 5.2))
-    plt.plot(df_on['SimTime'], df_on['WaitingReroute'], color=COLORS['bpr_on'], linewidth=2.2, label='С BPR-регулированием (SO)')
-    plt.plot(df_off['SimTime'], df_off['WaitingReroute'], color=COLORS['bpr_off'], linewidth=2.2, label='Без BPR-регулирования (UE)')
-    
-    plt.xlabel("Время симуляции (секунды)", fontsize=11)
-    plt.ylabel("Количество ТС в очереди на перерасчет (ед.)", fontsize=11)
-    plt.grid(True, linestyle='--', alpha=0.5)
+
+    # 3. Queues (Spawn and Reroute)
+    plt.figure()
+    spawn = np.array(df['WaitingSpawn'])
+    spawn_masked = np.where(spawn > 100000, np.nan, spawn)
+    plt.plot(time, spawn_masked, color='#9467bd', linewidth=2.0, linestyle='--', label='Очередь на спавн')
+    plt.plot(time, df['WaitingReroute'], color='#ff7f0e', linewidth=2.0, label='Очередь MPR (Перестроения)')
+    plt.xlabel("Время симуляции (с)")
+    plt.ylabel("Количество агентов в очереди")
+    plt.grid(True, linestyle=':', alpha=0.6)
+    plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0')
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUTPUT_DIR, "fig_queues.png"), bbox_inches='tight', pad_inches=0.02)
+    plt.close()
+
+    # 4. Completed Trips (Завершенные поездки)
+    plt.figure()
+    plt.plot(time, df['CompletedTrips'], color='#8c564b', linewidth=2.0, label='Накопленные завершенные поездки')
+    plt.xlabel("Время симуляции (с)")
+    plt.ylabel("Завершенные поездки (ед.)")
+    plt.grid(True, linestyle=':', alpha=0.6)
     plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0', loc='upper left')
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "simulation_queue_comparison.png"), bbox_inches='tight', pad_inches=0.02, dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "fig_completed_trips.png"), bbox_inches='tight', pad_inches=0.02)
+    plt.close()
+
+    # 5. TTI с дисперсией (скользящее среднее + стандартное отклонение)
+    plt.figure()
+    window = 600 # 10 минут для сглаживания высокочастотных шумов
+    rolling_mean = df['TTI'].rolling(window=window, center=True, min_periods=1).mean()
+    rolling_std = df['TTI'].rolling(window=window, center=True, min_periods=1).std()
+    
+    lower_bound = (rolling_mean - rolling_std).clip(lower=1.0)
+    upper_bound = rolling_mean + rolling_std
+    
+    line_color = '#0b4f8a'   # Темно-синий
+    fill_color = '#4A90E2'   # Полупрозрачный синий
+    
+    plt.fill_between(time, lower_bound, upper_bound, color=fill_color, alpha=0.15, 
+                     label=r'Локальные колебания TTI ($\pm\sigma$)')
+    plt.plot(time, lower_bound, color=line_color, linestyle=':', linewidth=0.5, alpha=0.4)
+    plt.plot(time, upper_bound, color=line_color, linestyle=':', linewidth=0.5, alpha=0.4)
+    plt.plot(time, rolling_mean, color=line_color, linewidth=2.0, label='Скользящее среднее TTI')
+    plt.axhline(1.0, color='#d62728', linestyle='--', linewidth=1.0, alpha=0.7, 
+                label='Порог свободного движения (TTI = 1.0)')
+    
+    plt.xlabel("Время симуляции (с)")
+    plt.ylabel("Индекс TTI")
+    plt.grid(True, linestyle=':', alpha=0.6)
+    plt.legend(frameon=True, facecolor='white', edgecolor='#e0e0e0', loc='upper left')
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUTPUT_DIR, "fig_tti.png"), bbox_inches='tight', pad_inches=0.02)
     plt.close()
 
 def main():
     print("🎨 Generating high-performance scientific thesis charts with unified style...")
     generate_alt_qps()
     generate_hardware_cycles()
-    # generate_multithreading_scalability()
+    generate_multithreading_scalability()
     generate_best_combinations()
     generate_queue_overhead_trend()
     generate_accuracy_comparison()
-    # generate_simulation_comparisons()
+    generate_simulation_plots()
     print("🎉 All thesis charts generated successfully inside assets/images!")
 
 if __name__ == "__main__":
