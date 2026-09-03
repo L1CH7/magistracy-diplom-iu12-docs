@@ -1,8 +1,0 @@
-/* Custom mermaid styles */
-.node rect,
-.node circle,
-.node ellipse,
-.node polygon,
-.node path {
-    stroke-width: 2px;
-}
