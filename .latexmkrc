@@ -12,8 +12,6 @@ $pdf_mode = 5;
 $xelatex = 'mkdir -p build/chapters && xelatex -synctex=1 -interaction=nonstopmode -file-line-error -shell-escape %O %S';
 
 # 4. Пути к стилям (шаблон + локальные ассеты)
-ensure_path('TEXINPUTS', './latex-iu1-template/lib//:./assets//');
-
 if ( !defined &ensure_path ) {
     sub ensure_path {
         my ($var, $path) = @_;
@@ -22,6 +20,8 @@ if ( !defined &ensure_path ) {
         else { $ENV{$var} = $path . $sep; }
     }
 }
+
+ensure_path('TEXINPUTS', './latex-iu1-template/lib//:./assets//');
 
 # 5. Очистка
 $cleanup_mode = 1;
