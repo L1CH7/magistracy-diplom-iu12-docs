@@ -15,12 +15,15 @@ def generate_figures():
     
     os.makedirs(output_dir, exist_ok=True)
     
-    file1 = os.path.join(log_dir, "run_27-07-2026_170h_130s_conttimer_7c555245_bpr_on_prof_on_24b_300s_70000a_1asf.csv")
-    file2 = os.path.join(log_dir, "run_28-07-2026_48h_300s_conttimer_740a967b_bpr_on_prof_on_24b_300s_70000a_1asf.csv")
+    files1 = glob.glob(os.path.join(log_dir, "*170h_130s*bpr*.csv"))
+    files2 = glob.glob(os.path.join(log_dir, "*48h_300s*bpr*.csv"))
     
-    if not os.path.exists(file1) or not os.path.exists(file2):
+    if not files1 or not files2:
         print(f"Error: Could not find telemetry files in {log_dir}")
         sys.exit(1)
+        
+    file1 = files1[0]
+    file2 = files2[0]
         
     def load_and_filter_24h(filepath, start_hour, end_hour):
         data = {

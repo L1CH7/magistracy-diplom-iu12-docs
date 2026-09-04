@@ -1,0 +1,20 @@
+stateDiagram-v2
+    direction LR
+    [*] --> S0
+    
+    state "S0: Ожидание" as S0
+    state "S1: Поиск пути" as S1
+    state "S2: Свободный поток" as S2
+    state "S3: Затор" as S3
+    state "S4: Буфер дедлоков" as S4
+
+    S0 --> S1: С1
+    S1 --> S2: С2
+    S2 --> S3: С3
+    S3 --> S2: С4
+    S3 --> S3: С5
+    S3 --> S4: С6
+    S4 --> S4: С7
+    S4 --> S2: С8
+    S2 --> S0: С9
+    S4 --> S0: С10
