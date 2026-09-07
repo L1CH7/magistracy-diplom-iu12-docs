@@ -17,7 +17,7 @@ flowchart TB
         BinGeom[/"geometry_flat.bin<br>(EdgeID ↦ координаты)"/]
         BinIds[/"osm_ids.bin<br>(EdgeID ↦ OsmWayID)"/]
   end
-    OSM["Сырые данные OSM<br>(pbf / overpass)"] -- osm2pgsql --> SchemaOSM
+    OSM["Сырые данные OSM<br>(pbf / overpass)"] -- pyosmium --> SchemaOSM
     MemStorage -- "mmap (Zero-Copy)" --> TrafficCore["Traffic Core<br>(Симулятор)"]
     TrafficCore -- ZMQ Телеметрия --> ClientUI["UI Клиента<br>(MapLibre)"]
     SchemaOSM L_SchemaOSM_BuilderContainer_0@-- SELECT --> BuilderContainer["Graph Builder<br>(Контейнер)"]

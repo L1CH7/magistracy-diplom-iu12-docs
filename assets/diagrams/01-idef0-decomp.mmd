@@ -15,7 +15,7 @@ flowchart TD
     %% Механизмы (Mechanisms)
     %% Механизмы (Mechanisms)
     subgraph Mechanisms["МЕХАНИЗМЫ (Mechanism)"]
-        M1["Утилита osm2pgsql + Read Replica"]
+        M1["Модуль pyosmium + Read Replica"]
         M2["Topological Hash-Join + ST_Node"]
         M3["Процедура pgr_strongComponents"]
         M4["C++26 Graph Builder + libpqxx + BinaryDumper"]

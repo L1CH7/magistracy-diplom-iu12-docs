@@ -23,7 +23,7 @@ flowchart LR
         M1["СУБД PostgreSQL 17 (Master: ELT графа)"]
         M2["Сервер тайлов MVT (PostgreSQL Read Replica)"]
         M3["Модуль Graph Builder (C++26 / libpqxx)"]
-        M4["Утилита импорта osm2pgsql"]
+        M4["Модуль импорта PBF (pyosmium)"]
     end
 
     subgraph Outputs["ВЫХОДЫ (Output)"]
