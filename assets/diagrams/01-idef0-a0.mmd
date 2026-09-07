@@ -20,7 +20,7 @@ flowchart LR
 
     subgraph Mechanisms["МЕХАНИЗМЫ (Mechanism)"]
         direction LR
-        M1["СУБД PostgreSQL 17 (Master: ELT графа)"]
+        M1["СУБД PostgreSQL 17 (Master: Сборка графа)"]
         M2["Сервер тайлов MVT (PostgreSQL Read Replica)"]
         M3["Модуль Graph Builder (C++26 / libpqxx)"]
         M4["Модуль импорта PBF (pyosmium)"]

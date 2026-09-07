@@ -69,7 +69,7 @@
         <mxPoint x="880" y="380" as="targetPoint" />
       </mxGeometry>
     </mxCell>
-    <mxCell id="a0_mech_1" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" value="СУБД PostgreSQL 17&#xa;(Master: ELT графа)">
+    <mxCell id="a0_mech_1" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" value="СУБД PostgreSQL 17&#xa;(Master: Сборка графа)">
       <mxGeometry relative="1" x="-1" y="-10" as="geometry">
         <mxPoint x="-10" y="10" as="offset" />
         <mxPoint x="400" y="460" as="sourcePoint" />

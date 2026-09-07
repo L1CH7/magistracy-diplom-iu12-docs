@@ -85,7 +85,7 @@
         </mxCell>
 
         <!-- МЕХАНИЗМЫ (Mechanisms) - Снизу -->
-        <mxCell id="mech_1" value="СУБД PostgreSQL 17&#xa;(Master: ELT графа)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+        <mxCell id="mech_1" value="СУБД PostgreSQL 17&#xa;(Master: Сборка графа)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
           <mxGeometry x="-0.3" y="25" relative="1" as="geometry">
             <mxPoint x="400" y="520" as="sourcePoint"/>
             <mxPoint x="400" y="410" as="targetPoint"/>
