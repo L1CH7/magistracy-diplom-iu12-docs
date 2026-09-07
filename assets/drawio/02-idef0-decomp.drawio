@@ -147,10 +147,18 @@
         </mxCell>
 
         <!-- МЕХАНИЗМЫ (Mechanisms) СНИЗУ -->
-        <mxCell id="mech_d1" value="Утилита osm2pgsql" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+        <mxCell id="mech_d1" value="Утилита импорта&#xa;osm2pgsql" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
           <mxGeometry x="-0.6" y="15" relative="1" as="geometry">
-            <mxPoint x="240" y="640" as="sourcePoint"/>
-            <mxPoint x="240" y="230" as="targetPoint"/>
+            <mxPoint x="220" y="640" as="sourcePoint"/>
+            <mxPoint x="220" y="230" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="mech_d1_repl" value="Сервер тайлов MVT&#xa;(Read Replica)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.6" y="15" relative="1" as="geometry">
+            <mxPoint x="290" y="640" as="sourcePoint"/>
+            <mxPoint x="290" y="230" as="targetPoint"/>
             <mxPoint as="offset"/>
           </mxGeometry>
         </mxCell>
@@ -180,24 +188,24 @@
         </mxCell>
 
         <!-- ВЫХОДЫ ИЗВНЕ (Outputs) -->
-        <mxCell id="out_d1" value="База геоданных и топологии" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
-          <mxGeometry x="0.2" y="10" relative="1" as="geometry">
-            <mxPoint x="1030" y="510" as="sourcePoint"/>
-            <mxPoint x="1140" y="510" as="targetPoint"/>
+        <mxCell id="out_d1" value="Векторные картографические тайлы MVT&#xa;(ST_AsMVT / Read Replica)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="0.2" y="-14" relative="1" as="geometry">
+            <mxPoint x="340" y="170" as="sourcePoint"/>
+            <mxPoint x="1140" y="170" as="targetPoint"/>
             <mxPoint as="offset"/>
           </mxGeometry>
         </mxCell>
 
-        <mxCell id="out_d2" value="Реберный граф (eb_nodes, eb_edges)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
-          <mxGeometry x="0.2" y="10" relative="1" as="geometry">
-            <mxPoint x="1030" y="530" as="sourcePoint"/>
-            <mxPoint x="1140" y="530" as="targetPoint"/>
+        <mxCell id="out_d2" value="Топологический граф маневров&#xa;(graphs.eb_nodes, graphs.eb_edges)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="0.75" y="12" relative="1" as="geometry">
+            <mxPoint x="1030" y="515" as="sourcePoint"/>
+            <mxPoint x="1140" y="515" as="targetPoint"/>
             <mxPoint as="offset"/>
           </mxGeometry>
         </mxCell>
 
-        <mxCell id="out_d3" value="Бинарные дампы памяти (CSR, ALT)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
-          <mxGeometry x="0.2" y="10" relative="1" as="geometry">
+        <mxCell id="out_d3" value="Бинарные дампы графа&#xa;(дампы CSR, Spatial Grid)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="0.75" y="12" relative="1" as="geometry">
             <mxPoint x="1030" y="550" as="sourcePoint"/>
             <mxPoint x="1140" y="550" as="targetPoint"/>
             <mxPoint as="offset"/>

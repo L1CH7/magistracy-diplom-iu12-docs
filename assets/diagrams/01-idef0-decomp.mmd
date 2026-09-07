@@ -13,8 +13,9 @@ flowchart TD
     end
 
     %% Механизмы (Mechanisms)
+    %% Механизмы (Mechanisms)
     subgraph Mechanisms["МЕХАНИЗМЫ (Mechanism)"]
-        M1["Утилита osm2pgsql + PostGIS"]
+        M1["Утилита osm2pgsql + Read Replica"]
         M2["Topological Hash-Join + ST_Node"]
         M3["Процедура pgr_strongComponents"]
         M4["C++26 Graph Builder + libpqxx + BinaryDumper"]
@@ -27,18 +28,22 @@ flowchart TD
     A1["<b>А1</b><br/>Импорт и пространственная<br/>фильтрация геоданных"]:::box
     A2["<b>А2</b><br/>Пространственное нодирование<br/>и топологическая сшивка"]:::box
     A3["<b>А3</b><br/>Анализ связности и<br/>изоляция главной компоненты (LCC)"]:::box
-    A4["<b>А4</b><br/>Построение реберного графа (Line-Graph)<br/>и бинарная сериализация"]:::box
+    A4["<b>А4</b><br/>Построение реберного графа (Line-Graph)<br/>и выгрузка маневров"]:::box
 
     %% Итоговые выходы
-    OutDB[("Реляционная схема eb_graph<br/>(eb_nodes, eb_edges)")]
-    OutDumps[/"Бинарные дампы CSR,<br/>Landmarks, Attributes"/]
-    OutLog["Журнал чекпоинтов<br/>(graphs.builder_state)"]
+    OutMVT[/"Векторные картографические тайлы MVT<br/>(ST_AsMVT / Read Replica)"/]
+    OutDB[("Топологический граф маневров<br/>(graphs.eb_nodes, graphs.eb_edges)")]
+    OutDumps[/"Бинарные дампы графа<br/>(CSR, Spatial Grid, Attributes)"/]
 
     %% Входы и межблочные потоки (Inputs & Internal Outputs)
     InputOSM --> A1
-    A1 -->|"Таблицы osm.ways,<br/>osm.turn_restrictions"| A2
+    A1 -->|"Таблицы osm.ways"| A2
+    A1 -->|"Ограничения osm.turn_restrictions"| A4
     A2 -->|"Промежуточный граф<br/>graphs.nodes, graphs.edges"| A3
-    A3 -->|"Изолированный связный граф<br/>(без тупиков и островов)"| A4
+    A3 -->|"Изолированный связный граф GCC"| A4
+
+    %% Выход MVT напрямую из блока А1 (через репликацию osm.ways)
+    A1 --> OutMVT
 
     %% Управления к блокам (Controls -> Blocks)
     C1 --> A1
@@ -52,10 +57,9 @@ flowchart TD
     M3 --> A3
     M4 --> A4
 
-    %% Выходы из финального блока
+    %% Выходы из блока А4
     A4 --> OutDB
     A4 --> OutDumps
-    A4 --> OutLog
 
     classDef box fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#000;
     classDef default font-family:sans-serif;

@@ -60,7 +60,7 @@
         </mxCell>
 
         <!-- ВЫХОДЫ (Outputs) - Справа -->
-        <mxCell id="out_1" value="База геоданных и топологии&#xa;(схемы osm, graphs)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+        <mxCell id="out_1" value="Векторные картографические тайлы&#xa;(MVT / Protobuf)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
           <mxGeometry x="0.2" y="15" relative="1" as="geometry">
             <mxPoint x="660" y="290" as="sourcePoint"/>
             <mxPoint x="880" y="290" as="targetPoint"/>
@@ -68,7 +68,7 @@
           </mxGeometry>
         </mxCell>
 
-        <mxCell id="out_2" value="Реберный граф маневров&#xa;(Line-Graph: eb_nodes, eb_edges)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+        <mxCell id="out_2" value="Топологический граф маневров&#xa;(Line-Graph: eb_nodes, eb_edges)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
           <mxGeometry x="0.2" y="15" relative="1" as="geometry">
             <mxPoint x="660" y="335" as="sourcePoint"/>
             <mxPoint x="880" y="335" as="targetPoint"/>
@@ -76,7 +76,7 @@
           </mxGeometry>
         </mxCell>
 
-        <mxCell id="out_3" value="Бинарные структуры памяти&#xa;(дампы CSR, ALT, Attributes)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+        <mxCell id="out_3" value="Бинарные дампы графа&#xa;(дампы CSR, Spatial Grid)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
           <mxGeometry x="0.2" y="15" relative="1" as="geometry">
             <mxPoint x="660" y="380" as="sourcePoint"/>
             <mxPoint x="880" y="380" as="targetPoint"/>
@@ -85,26 +85,34 @@
         </mxCell>
 
         <!-- МЕХАНИЗМЫ (Mechanisms) - Снизу -->
-        <mxCell id="mech_1" value="СУБД PostgreSQL 17&#xa;+ PostGIS + pgRouting" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+        <mxCell id="mech_1" value="СУБД PostgreSQL 17&#xa;(Master: ELT графа)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
           <mxGeometry x="-0.3" y="25" relative="1" as="geometry">
-            <mxPoint x="420" y="520" as="sourcePoint"/>
-            <mxPoint x="420" y="410" as="targetPoint"/>
+            <mxPoint x="400" y="520" as="sourcePoint"/>
+            <mxPoint x="400" y="410" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="mech_4" value="Сервер тайлов MVT&#xa;(PostgreSQL Read Replica)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.3" y="25" relative="1" as="geometry">
+            <mxPoint x="480" y="520" as="sourcePoint"/>
+            <mxPoint x="480" y="410" as="targetPoint"/>
             <mxPoint as="offset"/>
           </mxGeometry>
         </mxCell>
 
         <mxCell id="mech_2" value="Модуль Graph Builder&#xa;(C++26 / libpqxx)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
           <mxGeometry x="-0.3" y="25" relative="1" as="geometry">
-            <mxPoint x="510" y="520" as="sourcePoint"/>
-            <mxPoint x="510" y="410" as="targetPoint"/>
+            <mxPoint x="555" y="520" as="sourcePoint"/>
+            <mxPoint x="555" y="410" as="targetPoint"/>
             <mxPoint as="offset"/>
           </mxGeometry>
         </mxCell>
 
         <mxCell id="mech_3" value="Утилита импорта&#xa;osm2pgsql" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
           <mxGeometry x="-0.3" y="25" relative="1" as="geometry">
-            <mxPoint x="600" y="520" as="sourcePoint"/>
-            <mxPoint x="600" y="410" as="targetPoint"/>
+            <mxPoint x="625" y="520" as="sourcePoint"/>
+            <mxPoint x="625" y="410" as="targetPoint"/>
             <mxPoint as="offset"/>
           </mxGeometry>
         </mxCell>

@@ -20,18 +20,17 @@ flowchart LR
 
     subgraph Mechanisms["МЕХАНИЗМЫ (Mechanism)"]
         direction LR
-        M1["СУБД PostgreSQL 17 + PostGIS 3.5 + pgRouting 3.8"]
-        M2["Конвейер Graph Builder (C++26 / libpqxx)"]
-        M3["Утилита импорта osm2pgsql"]
-        M4["Вычислительные ресурсы сервера (CPU, RAM, NVMe)"]
+        M1["СУБД PostgreSQL 17 (Master: ELT графа)"]
+        M2["Сервер тайлов MVT (PostgreSQL Read Replica)"]
+        M3["Модуль Graph Builder (C++26 / libpqxx)"]
+        M4["Утилита импорта osm2pgsql"]
     end
 
     subgraph Outputs["ВЫХОДЫ (Output)"]
         direction TB
-        O1["Реляционная БД геоданных и топологии<br/>(схемы osm, graphs)"]
-        O2["Направленный реберный граф маневров<br/>(Line-Graph: eb_nodes, eb_edges)"]
-        O3["Плоские структуры сверхбыстрого доступа<br/>(дампы CSR, ALT Landmarks, Attributes)"]
-        O4["Журнал контрольных точек пайплайна<br/>(graphs.builder_state)"]
+        O1["Векторные картографические тайлы<br/>(MVT / Protobuf для фронтенда)"]
+        O2["Топологический граф маневров<br/>(Line-Graph: eb_nodes, eb_edges)"]
+        O3["Бинарные дампы графа<br/>(дампы CSR, Spatial Grid, Attributes)"]
     end
 
     A0["<b>А0</b><br/><br/><b>ФОРМИРОВАНИЕ И СОПРОВОЖДЕНИЕ<br/>БАЗЫ ГЕОПРОСТРАНСТВЕННЫХ ДАННЫХ<br/>И ТОПОЛОГИЧЕСКИХ МОДЕЛЕЙ<br/>ТРАНСПОРТНОЙ СЕТИ</b>"]:::processBlock
