@@ -90,7 +90,7 @@
         <mxPoint x="555" y="410" as="targetPoint" />
       </mxGeometry>
     </mxCell>
-    <mxCell id="a0_mech_3" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" value="Утилита импорта&#xa;osm2pgsql">
+    <mxCell id="a0_mech_3" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" value="Модуль импорта PBF&#xa;(pyosmium)">
       <mxGeometry relative="1" x="-1" y="-10" as="geometry">
         <mxPoint x="-10" y="10" as="offset" />
         <mxPoint x="625" y="490" as="sourcePoint" />
@@ -223,7 +223,7 @@
         <mxPoint x="930" y="1170" as="targetPoint" />
       </mxGeometry>
     </mxCell>
-    <mxCell id="decomp_mech_d1" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" value="Утилита импорта&#xa;osm2pgsql">
+    <mxCell id="decomp_mech_d1" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" value="Модуль импорта PBF&#xa;(pyosmium)">
       <mxGeometry relative="1" x="-1" as="geometry">
         <mxPoint as="offset" />
         <mxPoint x="220" y="1290" as="sourcePoint" />

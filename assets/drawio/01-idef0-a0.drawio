@@ -109,7 +109,7 @@
           </mxGeometry>
         </mxCell>
 
-        <mxCell id="mech_3" value="Утилита импорта&#xa;osm2pgsql" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+        <mxCell id="mech_3" value="Модуль импорта PBF&#xa;(pyosmium)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;fontColor=#000000;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
           <mxGeometry x="-0.3" y="25" relative="1" as="geometry">
             <mxPoint x="625" y="520" as="sourcePoint"/>
             <mxPoint x="625" y="410" as="targetPoint"/>
