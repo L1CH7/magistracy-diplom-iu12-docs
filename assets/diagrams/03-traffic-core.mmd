@@ -1,0 +1,58 @@
+---
+config:
+  layout: fixed
+---
+flowchart TB
+ subgraph Offline["Офлайн подготовка данных"]
+        DB[("PostgreSQL (PGRouting)<br>OSM + EB-Graph")]
+        Builder["Graph Builder<br>(Парсер графа)"]
+        Bin["Бинарные дампы<br>csr.bin, landmarks.bin, ..."]
+  end
+ subgraph RouterMod["Модуль маршрутизации"]
+        Router["TD-ALT Router"]
+        VM["Volume Manager<br>(Атомарные BPR-корзинки)"]
+  end
+ subgraph TrafficCore["Traffic Core Daemon"]
+    direction TB
+        TE["Traffic Engine<br>(Ядро)"]
+        DP["Data Provider<br>(Симуляция и кинематика агентов)"]
+        MPR["Decision Engine<br>(Модуль принятия решений)"]
+        RouterMod
+        Telemetry["Telemetry Module<br>(Агрегация логов и метрик)"]
+        ZMQ_PUB(("ZMQ PUB Socket"))
+        ZMQ_REP(("ZMQ REP Socket"))
+  end
+    DB <-- SELECT/INSERT --> Builder
+    TE <-- расчет движения и спавн --> DP
+    TE -- Сбор метрик --> Telemetry
+    VM -. Динамические веса (BPR) .-> Router
+    TE -- изменение плотности ребер --> VM
+    TE <-- поиск задержек;<br> буфер застрявших --> MPR
+    Builder -- Сериализация --> Bin
+    TE <-- запрос маршрутов --> Router
+    ZMQ_REP <-- REQ-REP API запросов --> TE
+    
+    %% Распределение бинарных дампов по рантайм-модулям
+    Bin -. "csr.bin, landmarks.bin" .-> Router
+    Bin -. "k_magic.bin, attributes.bin" .-> VM
+    Bin -. "spatial_grid.bin" .-> DP
+    Bin -. "osm_ids.bin, geometry_flat.bin" .-> Telemetry
+    
+    Telemetry -- Публикация телеметрии --> ZMQ_PUB
+
+    Bin@{ shape: disk}
+     DB:::db
+     Builder:::core
+     Bin:::container
+     Router:::router
+     VM:::router
+     TE:::core
+     DP:::core
+     MPR:::core
+     Telemetry:::core
+     ZMQ_PUB:::container
+     ZMQ_REP:::container
+    classDef container fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef db fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef core fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef router fill:#fce4ec,stroke:#c2185b,stroke-width:2px

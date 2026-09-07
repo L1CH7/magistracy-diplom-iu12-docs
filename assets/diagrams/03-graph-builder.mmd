@@ -1,0 +1,48 @@
+---
+config:
+  layout: fixed
+---
+flowchart TB
+ subgraph Storage["Слой реляционного хранения (PostgreSQL)"]
+        SchemaOSM["Схема osm"]
+        SchemaGraph["Схема eb_graph<br>(Нормализованная Edge-Based топология)"]
+  end
+ subgraph MemStorage["Слой сверхбыстрого доступа"]
+    direction LR
+        BinCSR[/"csr.bin, csr_rev.bin<br>(Топология графа)"/]
+        BinLM[/"landmarks.bin<br>(ALT Эвристика)"/]
+        BinAttr[/"attributes.bin<br>(Геометрия и атрибуты)"/]
+        BinMagic[/"k_magic.bin<br>(Мезоскопические BPR-константы)"/]
+        BinGrid[/"spatial_grid.bin<br>(Сетка координат)"/]
+        BinGeom[/"geometry_flat.bin<br>(EdgeID ↦ координаты)"/]
+        BinIds[/"osm_ids.bin<br>(EdgeID ↦ OsmWayID)"/]
+  end
+    OSM["Сырые данные OSM<br>(pbf / overpass)"] -- osm2pgsql --> SchemaOSM
+    MemStorage -- "mmap (Zero-Copy)" --> TrafficCore["Traffic Core<br>(Симулятор)"]
+    TrafficCore -- ZMQ Телеметрия --> ClientUI["UI Клиента<br>(MapLibre)"]
+    SchemaOSM L_SchemaOSM_BuilderContainer_0@-- SELECT --> BuilderContainer["Graph Builder<br>(Контейнер)"]
+    BuilderContainer == "Сериализация (std::ofstream)" ==> MemStorage
+    BuilderContainer <-- "INSERT/UPDATE<br>(Построение EB-графа);<br>Чтение в ОЗУ" --> SchemaGraph
+
+    SchemaOSM@{ shape: cyl}
+    SchemaGraph@{ shape: cyl}
+    OSM@{ shape: disk}
+     SchemaOSM:::db
+     SchemaGraph:::db
+     BinCSR:::data
+     BinLM:::data
+     BinAttr:::data
+     BinMagic:::data
+     BinGrid:::data
+     BinGeom:::data
+     BinIds:::data
+     OSM:::data
+     TrafficCore:::process
+     ClientUI:::process
+     BuilderContainer:::builder
+    classDef data fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef db fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef process fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef builder fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+
+    L_SchemaOSM_BuilderContainer_0@{ curve: linear }
