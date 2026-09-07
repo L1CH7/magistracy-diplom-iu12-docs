@@ -1,0 +1,109 @@
+erDiagram
+    %% =========================================================================
+    %% IDEF1 / IDEF1X: Информационная модель реляционной базы данных
+    %% Проект: HFT Routing & Traffic Simulation Engine (Схемы osm и graphs)
+    %% =========================================================================
+
+    %% --- Слой 1: Исходные картографические геоданные (Схема osm) ---
+    osm_ways {
+        bigint id PK "Внутренний суррогатный ключ"
+        bigint osm_id "Идентификатор сущности в OpenStreetMap"
+        geometry geom "Геометрия LineString(4326)"
+        geometry geom_3857 "Векторная проекция Web Mercator для MVT"
+        jsonb tags "Сырые OSM-теги в формате JSONB"
+        varchar highway "Функциональный класс магистрали"
+        varchar maxspeed "Ограничение скорости (строка OSM)"
+        varchar oneway "Флаг односторонности"
+        int lanes "Количество полос движения"
+        int z_layer "Высотный уровень (мост/эстакада/тоннель)"
+    }
+
+    osm_turn_restrictions {
+        bigint id PK "Идентификатор ограничения"
+        bigint osm_id "OSM Relation ID"
+        jsonb members "Массив участников маневра (from, via, to)"
+        varchar restriction_type "Тип ограничения (no_left_turn, only_straight)"
+    }
+
+    osm_barriers {
+        bigint id PK "Идентификатор барьера"
+        bigint osm_id "OSM ID барьера"
+        geometry geom "Геометрия точки Point(4326)"
+        varchar barrier_type "Тип барьера (gate, bollard, fence)"
+        varchar access "Право доступа (private, no, emergency)"
+    }
+
+    %% --- Слой 2: Узловой граф промежуточной топологии (Схема graphs) ---
+    graphs_nodes {
+        bigint id PK "Идентификатор перекрестка"
+        bigint osm_node_id "Исходный идентификатор OSM"
+        geometry geom "Топологическая вершина Point(4326)"
+    }
+
+    graphs_edges {
+        bigint id PK "Идентификатор ребра"
+        bigint source_id FK "Ссылка на начальный узел (graphs_nodes)"
+        bigint target_id FK "Ссылка на конечный узел (graphs_nodes)"
+        bigint osm_way_id FK "Ссылка на линию-источник (osm_ways)"
+        geometry geometry "Геометрия ребра LineString(4326)"
+        float length_m "Геодезическая длина в метрах"
+        float speed_limit_kmh "Паспортное ограничение скорости"
+        float effective_speed_kmh "Расчетная скорость (+19 км/ч)"
+        float duration "Время свободного проезда t_free (сек)"
+        float cost "Вес прямого направления (pgr convention)"
+        float reverse_cost "Вес обратного направления (-1 если запрещено)"
+        int lanes "Число полос"
+        int z_layer "Высотный слой"
+    }
+
+    %% --- Слой 3: Направленный реберный граф маневров (Line Graph) ---
+    graphs_eb_nodes {
+        bigint id PK "Dense индекс направленного сегмента (0..N-1)"
+        bigint orig_edge_id FK "Ссылка на исходное ребро (graphs_edges)"
+        bigint entry_node FK "Входной узел перекрестка (graphs_nodes)"
+        bigint exit_node FK "Выходной узел перекрестка (graphs_nodes)"
+        geometry geom "Направленная геометрия сегмента LineString(4326)"
+        float length_m "Длина сегмента"
+        float t_free "Базовое время преодоления"
+        float speed_kmh "Расчетная скорость потока"
+        int lanes "Полосность"
+        int oneway "Флаг односторонности"
+    }
+
+    graphs_eb_edges {
+        bigint id PK "Идентификатор физического маневра"
+        bigint from_eb_node FK "Входящий направленный сегмент (graphs_eb_nodes)"
+        bigint to_eb_node FK "Исходящий направленный сегмент (graphs_eb_nodes)"
+        bigint junction_node FK "Узел сопряжения маневра (graphs_nodes)"
+        float turn_angle "Угол отклонения траектории в градусах"
+        smallint turn_type "Класс поворота (0:прямо, 1:право, 2:лево, 3:разворот)"
+        float maneuver_time "Штраф за маневр (сек)"
+    }
+
+    %% --- Слой 4: Контроль состояния конвейера ---
+    graphs_builder_state {
+        varchar stage PK "Имя завершенной стадии пайплайна"
+        timestamp completed_at "Временная метка фиксации чекпоинта"
+    }
+
+    %% =========================================================================
+    %% СВЯЗИ СУЩНОСТЕЙ (Ограничения целостности и внешние ключи)
+    %% =========================================================================
+
+    %% Узлы и ребра промежуточного графа
+    graphs_nodes ||--o{ graphs_edges : "source_id"
+    graphs_nodes ||--o{ graphs_edges : "target_id"
+    osm_ways ||--o{ graphs_edges : "osm_way_id"
+
+    %% Ограничения поворотов ссылаются на исходные линии
+    osm_ways ||--o{ osm_turn_restrictions : "references"
+
+    %% Построение направленных сегментов Line Graph
+    graphs_edges ||--o{ graphs_eb_nodes : "orig_edge_id"
+    graphs_nodes ||--o{ graphs_eb_nodes : "entry_node"
+    graphs_nodes ||--o{ graphs_eb_nodes : "exit_node"
+
+    %% Связи маневров на перекрестках
+    graphs_eb_nodes ||--o{ graphs_eb_edges : "from_eb_node"
+    graphs_eb_nodes ||--o{ graphs_eb_edges : "to_eb_node"
+    graphs_nodes ||--o{ graphs_eb_edges : "junction_node"

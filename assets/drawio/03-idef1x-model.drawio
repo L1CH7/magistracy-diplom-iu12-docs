@@ -1,0 +1,252 @@
+<mxfile host="app.diagrams.net" modified="2026-09-07T21:00:00.000Z" agent="Antigravity" version="21.0.0" type="device">
+  <diagram id="idef1x-model" name="IDEF1X-Модель">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ТАБЛИЦА 1: OsmWays -->
+        <mxCell id="t_ways" value="OsmWays" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=#ffffff;strokeColor=#000000;rounded=0;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="220" height="240" as="geometry"/>
+        </mxCell>
+        <mxCell id="ways_pk" value="PK | id (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontStyle=4;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_ways">
+          <mxGeometry y="26" width="220" height="24" as="geometry"/>
+        </mxCell>
+        <mxCell id="ways_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;strokeColor=#000000;" vertex="1" parent="t_ways">
+          <mxGeometry y="50" width="220" height="6" as="geometry"/>
+        </mxCell>
+        <mxCell id="ways_a1" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;osm_id (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_ways">
+          <mxGeometry y="56" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="ways_a2" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;geom (geometry)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_ways">
+          <mxGeometry y="76" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="ways_a3" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;geom_3857 (geometry)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_ways">
+          <mxGeometry y="96" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="ways_a4" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;tags (jsonb)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_ways">
+          <mxGeometry y="116" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="ways_a5" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;highway (varchar)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_ways">
+          <mxGeometry y="136" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="ways_a6" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;maxspeed (varchar)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_ways">
+          <mxGeometry y="156" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="ways_a7" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;oneway (varchar)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_ways">
+          <mxGeometry y="176" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="ways_a8" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;lanes (int)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_ways">
+          <mxGeometry y="196" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="ways_a9" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;z_layer (int)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_ways">
+          <mxGeometry y="216" width="220" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- ТАБЛИЦА 2: GraphsNodes -->
+        <mxCell id="t_nodes" value="GraphsNodes" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=#ffffff;strokeColor=#000000;rounded=0;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="340" y="60" width="220" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="nodes_pk" value="PK | id (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontStyle=4;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_nodes">
+          <mxGeometry y="26" width="220" height="24" as="geometry"/>
+        </mxCell>
+        <mxCell id="nodes_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;strokeColor=#000000;" vertex="1" parent="t_nodes">
+          <mxGeometry y="50" width="220" height="6" as="geometry"/>
+        </mxCell>
+        <mxCell id="nodes_a1" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;osm_node_id (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_nodes">
+          <mxGeometry y="56" width="220" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="nodes_a2" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;geom (geometry)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_nodes">
+          <mxGeometry y="78" width="220" height="22" as="geometry"/>
+        </mxCell>
+
+        <!-- ТАБЛИЦА 3: GraphsEdges -->
+        <mxCell id="t_edges" value="GraphsEdges" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=#ffffff;strokeColor=#000000;rounded=0;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="340" y="240" width="220" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="edges_pk" value="PK | id (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontStyle=4;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_edges">
+          <mxGeometry y="26" width="220" height="24" as="geometry"/>
+        </mxCell>
+        <mxCell id="edges_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;strokeColor=#000000;" vertex="1" parent="t_edges">
+          <mxGeometry y="50" width="220" height="6" as="geometry"/>
+        </mxCell>
+        <mxCell id="edges_fk1" value="FK | source_id (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_edges">
+          <mxGeometry y="56" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="edges_fk2" value="FK | target_id (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_edges">
+          <mxGeometry y="76" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="edges_fk3" value="FK | osm_way_id (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_edges">
+          <mxGeometry y="96" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="edges_a1" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;geometry (geometry)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_edges">
+          <mxGeometry y="116" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="edges_a2" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;length_m (float)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_edges">
+          <mxGeometry y="136" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="edges_a3" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;speed_limit_kmh (float)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_edges">
+          <mxGeometry y="156" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="edges_a4" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;effective_speed_kmh (float)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_edges">
+          <mxGeometry y="176" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="edges_a5" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;duration (float)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_edges">
+          <mxGeometry y="196" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="edges_a6" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;cost (float)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_edges">
+          <mxGeometry y="216" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="edges_a7" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;reverse_cost (float)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_edges">
+          <mxGeometry y="236" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="edges_a8" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;z_layer (int)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_edges">
+          <mxGeometry y="256" width="220" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- ТАБЛИЦА 4: GraphsEbNodes (Line Graph Узлы) -->
+        <mxCell id="t_eb_nodes" value="GraphsEbNodes" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=#ffffff;strokeColor=#000000;rounded=0;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="640" y="240" width="230" height="240" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_nodes_pk" value="PK | id (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontStyle=4;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_nodes">
+          <mxGeometry y="26" width="230" height="24" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_nodes_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;strokeColor=#000000;" vertex="1" parent="t_eb_nodes">
+          <mxGeometry y="50" width="230" height="6" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_nodes_fk1" value="FK | orig_edge_id (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_nodes">
+          <mxGeometry y="56" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_nodes_fk2" value="FK | entry_node (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_nodes">
+          <mxGeometry y="76" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_nodes_fk3" value="FK | exit_node (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_nodes">
+          <mxGeometry y="96" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_nodes_a1" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;geom (geometry)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_nodes">
+          <mxGeometry y="116" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_nodes_a2" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;length_m (float)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_nodes">
+          <mxGeometry y="136" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_nodes_a3" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;t_free (float)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_nodes">
+          <mxGeometry y="156" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_nodes_a4" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;speed_kmh (float)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_nodes">
+          <mxGeometry y="176" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_nodes_a5" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;lanes (int)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_nodes">
+          <mxGeometry y="196" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_nodes_a6" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;oneway (int)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_nodes">
+          <mxGeometry y="216" width="230" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- ТАБЛИЦА 5: GraphsEbEdges (Line Graph Маневры) -->
+        <mxCell id="t_eb_edges" value="GraphsEbEdges" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=#ffffff;strokeColor=#000000;rounded=0;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="940" y="240" width="220" height="180" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_edges_pk" value="PK | id (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontStyle=4;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_edges">
+          <mxGeometry y="26" width="220" height="24" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_edges_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;strokeColor=#000000;" vertex="1" parent="t_eb_edges">
+          <mxGeometry y="50" width="220" height="6" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_edges_fk1" value="FK | from_eb_node (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_edges">
+          <mxGeometry y="56" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_edges_fk2" value="FK | to_eb_node (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_edges">
+          <mxGeometry y="76" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_edges_fk3" value="FK | junction_node (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_edges">
+          <mxGeometry y="96" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_edges_a1" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;turn_angle (float)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_edges">
+          <mxGeometry y="116" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_edges_a2" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;turn_type (smallint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_edges">
+          <mxGeometry y="136" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="eb_edges_a3" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;maneuver_time (float)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_eb_edges">
+          <mxGeometry y="156" width="220" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- ТАБЛИЦА 6: OsmTurnRestrictions -->
+        <mxCell id="t_tr" value="OsmTurnRestrictions" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=#ffffff;strokeColor=#000000;rounded=0;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="40" y="340" width="220" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="tr_pk" value="PK | id (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontStyle=4;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_tr">
+          <mxGeometry y="26" width="220" height="24" as="geometry"/>
+        </mxCell>
+        <mxCell id="tr_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;strokeColor=#000000;" vertex="1" parent="t_tr">
+          <mxGeometry y="50" width="220" height="6" as="geometry"/>
+        </mxCell>
+        <mxCell id="tr_a1" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;osm_id (bigint)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_tr">
+          <mxGeometry y="56" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="tr_a2" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;members (jsonb)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_tr">
+          <mxGeometry y="76" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="tr_a3" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;restriction_type (varchar)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_tr">
+          <mxGeometry y="96" width="220" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- ТАБЛИЦА 7: BuilderState -->
+        <mxCell id="t_state" value="BuilderState" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=#ffffff;strokeColor=#000000;rounded=0;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="640" y="60" width="230" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="state_pk" value="PK | stage (varchar)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontStyle=4;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_state">
+          <mxGeometry y="26" width="230" height="24" as="geometry"/>
+        </mxCell>
+        <mxCell id="state_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;strokeColor=#000000;" vertex="1" parent="t_state">
+          <mxGeometry y="50" width="230" height="6" as="geometry"/>
+        </mxCell>
+        <mxCell id="state_a1" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;completed_at (timestamp)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="t_state">
+          <mxGeometry y="56" width="230" height="24" as="geometry"/>
+        </mxCell>
+
+        <!-- СВЯЗИ IDEF1X (Connectors) -->
+        <!-- OsmWays -> GraphsEdges (osm_way_id) -->
+        <mxCell id="rel_ways_edges" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1;endArrow=ERzeroToMany;endFill=1;startArrow=ERmandOne;startFill=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="260" y="200" as="sourcePoint"/>
+            <mxPoint x="340" y="340" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- GraphsNodes -> GraphsEdges (source_id, target_id) -->
+        <mxCell id="rel_nodes_edges" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1;endArrow=ERzeroToMany;endFill=1;startArrow=ERmandOne;startFill=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="450" y="170" as="sourcePoint"/>
+            <mxPoint x="450" y="240" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- GraphsEdges -> GraphsEbNodes (orig_edge_id) -->
+        <mxCell id="rel_edges_ebnodes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1;endArrow=ERzeroToMany;endFill=1;startArrow=ERmandOne;startFill=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="560" y="310" as="sourcePoint"/>
+            <mxPoint x="640" y="310" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- GraphsEbNodes -> GraphsEbEdges (from_eb_node, to_eb_node) -->
+        <mxCell id="rel_ebnodes_ebedges" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1;endArrow=ERzeroToMany;endFill=1;startArrow=ERmandOne;startFill=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="870" y="330" as="sourcePoint"/>
+            <mxPoint x="940" y="330" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- OsmWays -> OsmTurnRestrictions -->
+        <mxCell id="rel_ways_tr" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1;endArrow=ERzeroToMany;endFill=1;startArrow=ERmandOne;startFill=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="300" as="sourcePoint"/>
+            <mxPoint x="150" y="340" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

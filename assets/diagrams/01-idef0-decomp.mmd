@@ -1,0 +1,61 @@
+flowchart TD
+    %% =========================================================================
+    %% IDEF0: Декомпозиция диаграммы A0 (Уровень 1)
+    %% Блоки: A1 (Импорт) -> A2 (Нодирование) -> A3 (LCC) -> A4 (Line Graph & Дампы)
+    %% =========================================================================
+
+    %% Управляющие воздействия (Controls)
+    subgraph Controls["УПРАВЛЕНИЯ (Control)"]
+        C1["Классификатор дорог и фильтры доступа (highway, access, barrier)"]
+        C2["Параметры нодирования (ST_SnapToGrid 0.00001, overlap 0.001°)"]
+        C3["Критерий максимальной связности (алгоритм Тарьяна)"]
+        C4["ПДД, запреты поворотов (osm.turn_restrictions) и штрафы маневров"]
+    end
+
+    %% Механизмы (Mechanisms)
+    subgraph Mechanisms["МЕХАНИЗМЫ (Mechanism)"]
+        M1["Утилита osm2pgsql + PostGIS"]
+        M2["Topological Hash-Join + ST_Node"]
+        M3["Процедура pgr_strongComponents"]
+        M4["C++26 Graph Builder + libpqxx + BinaryDumper"]
+    end
+
+    %% Входные данные
+    InputOSM["Сырые данные OSM (.pbf, bboxes.yaml)"]
+
+    %% Функциональные блоки
+    A1["<b>А1</b><br/>Импорт и пространственная<br/>фильтрация геоданных"]:::box
+    A2["<b>А2</b><br/>Пространственное нодирование<br/>и топологическая сшивка"]:::box
+    A3["<b>А3</b><br/>Анализ связности и<br/>изоляция главной компоненты (LCC)"]:::box
+    A4["<b>А4</b><br/>Построение реберного графа (Line-Graph)<br/>и бинарная сериализация"]:::box
+
+    %% Итоговые выходы
+    OutDB[("Реляционная схема eb_graph<br/>(eb_nodes, eb_edges)")]
+    OutDumps[/"Бинарные дампы CSR,<br/>Landmarks, Attributes"/]
+    OutLog["Журнал чекпоинтов<br/>(graphs.builder_state)"]
+
+    %% Входы и межблочные потоки (Inputs & Internal Outputs)
+    InputOSM --> A1
+    A1 -->|"Таблицы osm.ways,<br/>osm.turn_restrictions"| A2
+    A2 -->|"Промежуточный граф<br/>graphs.nodes, graphs.edges"| A3
+    A3 -->|"Изолированный связный граф<br/>(без тупиков и островов)"| A4
+
+    %% Управления к блокам (Controls -> Blocks)
+    C1 --> A1
+    C2 --> A2
+    C3 --> A3
+    C4 --> A4
+
+    %% Механизмы к блокам (Mechanisms -> Blocks)
+    M1 --> A1
+    M2 --> A2
+    M3 --> A3
+    M4 --> A4
+
+    %% Выходы из финального блока
+    A4 --> OutDB
+    A4 --> OutDumps
+    A4 --> OutLog
+
+    classDef box fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#000;
+    classDef default font-family:sans-serif;

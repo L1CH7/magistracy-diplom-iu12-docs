@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 680" width="1100" height="680">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#000000"/>
+    </marker>
+  </defs>
+
+  <rect width="1100" height="680" fill="#ffffff"/>
+
+  <!-- БЛОК А1 -->
+  <rect x="150" y="160" width="160" height="70" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+  <text x="230" y="190" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" fill="#000000">Импорт и первичная</text>
+  <text x="230" y="206" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" fill="#000000">фильтрация геоданных</text>
+  <text x="300" y="224" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="end" fill="#000000">А1</text>
+
+  <!-- БЛОК А2 -->
+  <rect x="370" y="270" width="170" height="70" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+  <text x="455" y="298" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" fill="#000000">Пространственное нодирование</text>
+  <text x="455" y="314" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" fill="#000000">и топологическая сшивка</text>
+  <text x="530" y="334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="end" fill="#000000">А2</text>
+
+  <!-- БЛОК А3 -->
+  <rect x="590" y="380" width="170" height="70" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+  <text x="675" y="408" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" fill="#000000">Анализ связности и</text>
+  <text x="675" y="424" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" fill="#000000">изоляция главной компоненты</text>
+  <text x="750" y="444" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="end" fill="#000000">А3</text>
+
+  <!-- БЛОК А4 -->
+  <rect x="810" y="490" width="180" height="75" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+  <text x="900" y="518" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" fill="#000000">Построение реберного графа</text>
+  <text x="900" y="534" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" fill="#000000">(Line-Graph) и сериализация</text>
+  <text x="980" y="558" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="end" fill="#000000">А4</text>
+
+  <!-- ВХОДЫ ИЗВНЕ -->
+  <line x1="30" y1="195" x2="150" y2="195" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="85" y="187" font-family="Helvetica, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#000000">Сырые данные OSM</text>
+
+  <line x1="30" y1="305" x2="370" y2="305" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="180" y="297" font-family="Helvetica, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#000000">Параметры области и сценария</text>
+
+  <!-- МЕЖБЛОЧНЫЕ СВЯЗИ -->
+  <!-- A1 -> A2 -->
+  <path d="M 310 185 L 340 185 L 340 285 L 370 285" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="345" y="200" font-family="Helvetica, Arial, sans-serif" font-size="9" fill="#000000">osm.ways</text>
+
+  <!-- A1 -> A4 (turn restrictions) -->
+  <path d="M 310 215 L 345 215 L 345 245 L 785 245 L 785 515 L 810 515" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="560" y="240" font-family="Helvetica, Arial, sans-serif" font-size="9" text-anchor="middle" fill="#000000">Ограничения поворотов (osm.turn_restrictions)</text>
+
+  <!-- A2 -> A3 -->
+  <path d="M 540 305 L 565 305 L 565 405 L 590 405" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="570" y="325" font-family="Helvetica, Arial, sans-serif" font-size="9" fill="#000000">Промежуточный граф</text>
+
+  <!-- A3 -> A4 -->
+  <path d="M 760 415 L 785 415 L 785 535 L 810 535" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="790" y="435" font-family="Helvetica, Arial, sans-serif" font-size="9" fill="#000000">Связный граф LCC</text>
+
+  <!-- УПРАВЛЕНИЯ СВЕРХУ -->
+  <line x1="230" y1="70" x2="230" y2="160" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="230" y="52" font-family="Helvetica, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#000000">Классификатор дорог OSM</text>
+
+  <line x1="455" y1="70" x2="455" y2="270" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="455" y="52" font-family="Helvetica, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#000000">Ограничения целостности PostGIS</text>
+
+  <line x1="675" y1="70" x2="675" y2="380" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="675" y="52" font-family="Helvetica, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#000000">Критерий максимальной связности</text>
+
+  <line x1="900" y1="70" x2="900" y2="490" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="900" y="52" font-family="Helvetica, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#000000">Правила дорожного движения</text>
+
+  <!-- МЕХАНИЗМЫ СНИЗУ -->
+  <path d="M 170 630 L 170 250 L 210 250 L 210 230" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="170" y="645" font-family="Helvetica, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#000000">osm2pgsql</text>
+
+  <path d="M 430 630 L 430 340" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="430" y="645" font-family="Helvetica, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#000000">PostGIS (ST_Node)</text>
+
+  <path d="M 650 630 L 650 450" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="650" y="645" font-family="Helvetica, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#000000">Алгоритм Тарьяна</text>
+
+  <path d="M 870 630 L 870 565" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="870" y="645" font-family="Helvetica, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#000000">Модуль Graph Builder</text>
+
+  <!-- ВЫХОДЫ НАПРАВО -->
+  <line x1="990" y1="510" x2="1080" y2="510" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="1035" y="502" font-family="Helvetica, Arial, sans-serif" font-size="9" text-anchor="middle" fill="#000000">База геоданных</text>
+
+  <line x1="990" y1="532" x2="1080" y2="532" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="1035" y="525" font-family="Helvetica, Arial, sans-serif" font-size="9" text-anchor="middle" fill="#000000">Реберный граф (eb_nodes)</text>
+
+  <line x1="990" y1="555" x2="1080" y2="555" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="1035" y="547" font-family="Helvetica, Arial, sans-serif" font-size="9" text-anchor="middle" fill="#000000">Бинарные дампы памяти</text>
+</svg>

@@ -1,0 +1,46 @@
+flowchart LR
+    %% =========================================================================
+    %% IDEF0: Контекстная диаграмма A0
+    %% Система: Формирование и сопровождение базы геоданных и топологии графа
+    %% =========================================================================
+
+    subgraph Inputs["ВХОДЫ (Input)"]
+        direction TB
+        I1["Сырые картографические данные OSM<br/>(файлы .osm.pbf, геометрии WGS-84)"]
+        I2["Параметры области и сценария<br/>(bboxes.yaml, scenario.yaml)"]
+    end
+
+    subgraph Controls["УПРАВЛЕНИЕ (Control)"]
+        direction LR
+        C1["ПДД и правила дорожной разметки"]
+        C2["Классификатор тегов OpenStreetMap"]
+        C3["Ограничения транзакционной целостности и геометрии PostGIS"]
+        C4["Конфигурация сборки графа (options.cmake, road_config.hpp)"]
+    end
+
+    subgraph Mechanisms["МЕХАНИЗМЫ (Mechanism)"]
+        direction LR
+        M1["СУБД PostgreSQL 17 + PostGIS 3.5 + pgRouting 3.8"]
+        M2["Конвейер Graph Builder (C++26 / libpqxx)"]
+        M3["Утилита импорта osm2pgsql"]
+        M4["Вычислительные ресурсы сервера (CPU, RAM, NVMe)"]
+    end
+
+    subgraph Outputs["ВЫХОДЫ (Output)"]
+        direction TB
+        O1["Реляционная БД геоданных и топологии<br/>(схемы osm, graphs)"]
+        O2["Направленный реберный граф маневров<br/>(Line-Graph: eb_nodes, eb_edges)"]
+        O3["Плоские структуры сверхбыстрого доступа<br/>(дампы CSR, ALT Landmarks, Attributes)"]
+        O4["Журнал контрольных точек пайплайна<br/>(graphs.builder_state)"]
+    end
+
+    A0["<b>А0</b><br/><br/><b>ФОРМИРОВАНИЕ И СОПРОВОЖДЕНИЕ<br/>БАЗЫ ГЕОПРОСТРАНСТВЕННЫХ ДАННЫХ<br/>И ТОПОЛОГИЧЕСКИХ МОДЕЛЕЙ<br/>ТРАНСПОРТНОЙ СЕТИ</b>"]:::processBlock
+
+    %% Связи ICOM
+    Inputs -->|Вход| A0
+    Controls -->|Управление| A0
+    Mechanisms -->|Механизм| A0
+    A0 -->|Выход| Outputs
+
+    classDef processBlock fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000,font-size:14px;
+    classDef default font-family:sans-serif;

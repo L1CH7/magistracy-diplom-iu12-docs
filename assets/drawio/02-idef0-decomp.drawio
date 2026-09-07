@@ -1,0 +1,210 @@
+<mxfile host="app.diagrams.net" modified="2026-09-07T21:00:00.000Z" agent="Antigravity" version="21.0.0" type="device">
+  <diagram id="idef0-decomp" name="IDEF0-Декомпозиция">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- БЛОК А1 -->
+        <mxCell id="block_a1" value="Импорт и первичная&#xa;фильтрация геоданных" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="180" y="160" width="160" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_a1" value="А1" style="text;html=1;strokeColor=none;fillColor=none;align=right;verticalAlign=bottom;fontSize=10;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="block_a1">
+          <mxGeometry x="1" y="1" width="25" height="20" relative="1" as="geometry">
+            <mxPoint x="-28" y="-22" as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- БЛОК А2 -->
+        <mxCell id="block_a2" value="Пространственное нодирование&#xa;и топологическая сшивка" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="400" y="270" width="170" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_a2" value="А2" style="text;html=1;strokeColor=none;fillColor=none;align=right;verticalAlign=bottom;fontSize=10;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="block_a2">
+          <mxGeometry x="1" y="1" width="25" height="20" relative="1" as="geometry">
+            <mxPoint x="-28" y="-22" as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- БЛОК А3 -->
+        <mxCell id="block_a3" value="Анализ связности и&#xa;изоляция главной компоненты" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="630" y="380" width="170" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_a3" value="А3" style="text;html=1;strokeColor=none;fillColor=none;align=right;verticalAlign=bottom;fontSize=10;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="block_a3">
+          <mxGeometry x="1" y="1" width="25" height="20" relative="1" as="geometry">
+            <mxPoint x="-28" y="-22" as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- БЛОК А4 -->
+        <mxCell id="block_a4" value="Построение реберного графа&#xa;(Line-Graph) и сериализация" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1.2;fontSize=11;fontFamily=Helvetica;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="850" y="490" width="180" height="75" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_a4" value="А4" style="text;html=1;strokeColor=none;fillColor=none;align=right;verticalAlign=bottom;fontSize=10;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="block_a4">
+          <mxGeometry x="1" y="1" width="25" height="20" relative="1" as="geometry">
+            <mxPoint x="-28" y="-22" as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ВХОДЫ ИЗВНЕ (Inputs) -->
+        <mxCell id="in_decomp_1" value="Сырые геоданные OSM&#xa;(.osm.pbf)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.2" y="12" relative="1" as="geometry">
+            <mxPoint x="60" y="195" as="sourcePoint"/>
+            <mxPoint x="180" y="195" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="in_decomp_2" value="Параметры сценария&#xa;(bboxes.yaml)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.6" y="12" relative="1" as="geometry">
+            <mxPoint x="60" y="305" as="sourcePoint"/>
+            <mxPoint x="400" y="305" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- МЕЖБЛОЧНЫЕ СВЯЗИ -->
+        <mxCell id="edge_a1_a2" value="Таблицы osm.ways" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="0.2" y="10" relative="1" as="geometry">
+            <mxPoint x="340" y="185" as="sourcePoint"/>
+            <mxPoint x="400" y="285" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="370" y="185"/>
+              <mxPoint x="370" y="285"/>
+            </Array>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="edge_a1_a4" value="Ограничения поворотов&#xa;(osm.turn_restrictions)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.7" y="10" relative="1" as="geometry">
+            <mxPoint x="340" y="215" as="sourcePoint"/>
+            <mxPoint x="850" y="515" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="380" y="215"/>
+              <mxPoint x="380" y="250"/>
+              <mxPoint x="830" y="250"/>
+              <mxPoint x="830" y="515"/>
+            </Array>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="edge_a2_a3" value="Промежуточный граф&#xa;(graphs.nodes, graphs.edges)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="0.2" y="10" relative="1" as="geometry">
+            <mxPoint x="570" y="305" as="sourcePoint"/>
+            <mxPoint x="630" y="405" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="600" y="305"/>
+              <mxPoint x="600" y="405"/>
+            </Array>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="edge_a3_a4" value="Связный граф LCC" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="0.2" y="10" relative="1" as="geometry">
+            <mxPoint x="800" y="415" as="sourcePoint"/>
+            <mxPoint x="850" y="535" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="825" y="415"/>
+              <mxPoint x="825" y="535"/>
+            </Array>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- УПРАВЛЕНИЯ (Controls) СВЕРХУ -->
+        <mxCell id="ctrl_d1" value="Классификатор дорог OSM&#xa;(фильтры highway, access)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.3" y="-15" relative="1" as="geometry">
+            <mxPoint x="240" y="60" as="sourcePoint"/>
+            <mxPoint x="240" y="160" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="ctrl_d2" value="Ограничения целостности&#xa;и геометрии PostGIS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.4" y="-15" relative="1" as="geometry">
+            <mxPoint x="470" y="60" as="sourcePoint"/>
+            <mxPoint x="470" y="270" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="ctrl_d3" value="Критерий максимальной&#xa;связности графа" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.5" y="-15" relative="1" as="geometry">
+            <mxPoint x="700" y="60" as="sourcePoint"/>
+            <mxPoint x="700" y="380" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="ctrl_d4" value="ПДД и штрафы&#xa;за маневры" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.6" y="-15" relative="1" as="geometry">
+            <mxPoint x="930" y="60" as="sourcePoint"/>
+            <mxPoint x="930" y="490" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- МЕХАНИЗМЫ (Mechanisms) СНИЗУ -->
+        <mxCell id="mech_d1" value="Утилита osm2pgsql" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.6" y="15" relative="1" as="geometry">
+            <mxPoint x="240" y="640" as="sourcePoint"/>
+            <mxPoint x="240" y="230" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="mech_d2" value="Topological Hash-Join&#xa;+ ST_Node (PostGIS)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.5" y="15" relative="1" as="geometry">
+            <mxPoint x="470" y="640" as="sourcePoint"/>
+            <mxPoint x="470" y="340" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="mech_d3" value="Алгоритм Тарьяна&#xa;(pgr_strongComponents)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.4" y="15" relative="1" as="geometry">
+            <mxPoint x="700" y="640" as="sourcePoint"/>
+            <mxPoint x="700" y="450" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="mech_d4" value="Модуль Graph Builder&#xa;(C++26 / libpqxx)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="-0.3" y="15" relative="1" as="geometry">
+            <mxPoint x="930" y="640" as="sourcePoint"/>
+            <mxPoint x="930" y="565" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ВЫХОДЫ ИЗВНЕ (Outputs) -->
+        <mxCell id="out_d1" value="База геоданных и топологии" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="0.2" y="10" relative="1" as="geometry">
+            <mxPoint x="1030" y="510" as="sourcePoint"/>
+            <mxPoint x="1140" y="510" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="out_d2" value="Реберный граф (eb_nodes, eb_edges)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="0.2" y="10" relative="1" as="geometry">
+            <mxPoint x="1030" y="530" as="sourcePoint"/>
+            <mxPoint x="1140" y="530" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="out_d3" value="Бинарные дампы памяти (CSR, ALT)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#000000;strokeWidth=1.2;fontSize=10;labelBackgroundColor=#ffffff;endArrow=classic;endFill=1;" edge="1" parent="1">
+          <mxGeometry x="0.2" y="10" relative="1" as="geometry">
+            <mxPoint x="1030" y="550" as="sourcePoint"/>
+            <mxPoint x="1140" y="550" as="targetPoint"/>
+            <mxPoint as="offset"/>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
